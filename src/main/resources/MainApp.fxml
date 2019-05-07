@@ -27,7 +27,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.131" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.htlstp.syp.mmtasking.controller.MainAppController">
+<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.htlstp.syp.mmtasking.controller.MainAppController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
@@ -320,19 +320,19 @@
                               <Font size="15.0" />
                            </font>
                         </Label>
-                        <JFXTextField layoutX="606.0" layoutY="275.0" prefHeight="27.0" prefWidth="173.0" />
                         <Label layoutX="432.0" layoutY="319.0" prefHeight="25.0" prefWidth="199.0" text="Fahrzeit automatisch:">
                            <font>
                               <Font size="15.0" />
                            </font>
                         </Label>
-                        <JFXToggleButton layoutX="596.0" layoutY="299.0" text="Dektiviert" />
+                        <JFXToggleButton layoutX="618.0" layoutY="302.0" text="Dektiviert" />
                         <Label layoutX="432.0" layoutY="128.0" prefHeight="25.0" prefWidth="199.0" text="Finalisierungserinnerung">
                            <font>
                               <Font size="15.0" />
                            </font>
                         </Label>
                         <ChoiceBox layoutX="628.0" layoutY="128.0" prefHeight="27.0" prefWidth="147.0" />
+                        <ChoiceBox fx:id="chbPrefLoc" layoutX="628.0" layoutY="279.0" prefHeight="27.0" prefWidth="147.0" />
                      </children>
                   </AnchorPane>
               </content>
