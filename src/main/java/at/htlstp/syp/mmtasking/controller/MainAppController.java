@@ -6,6 +6,7 @@
 package at.htlstp.syp.mmtasking.controller;
 
 import at.htlstp.syp.mmtasking.model.Appointment;
+import at.htlstp.syp.mmtasking.model.Category;
 import at.htlstp.syp.mmtasking.model.Task;
 import at.htlstp.syp.mmtasking.model.TaskPriority;
 import com.jfoenix.controls.JFXCheckBox;
@@ -62,7 +63,7 @@ public class MainAppController implements Initializable {
     @FXML
     private Label lblFahrzeit;
     @FXML
-    private ChoiceBox<?> cbKategorie;
+    private ChoiceBox<Category> cbKategorie;
     @FXML
     private ChoiceBox<?> cbOrt;
     @FXML
