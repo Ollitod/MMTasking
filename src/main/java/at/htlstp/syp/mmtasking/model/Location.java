@@ -9,14 +9,26 @@ package at.htlstp.syp.mmtasking.model;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
 /**
  *
  * @author Oliver Tod / 4BHIF
  */
-@Embeddable
+@Entity
+@Table(name = "location")
 public class Location implements Serializable {
 
+    
+    @Id
+    @Column(name = "loc_id")
+    @GeneratedValue(generator = "loc_seq")
+    private Integer id;
+    
     @Column(name = "loc_name")
     private String name;
 

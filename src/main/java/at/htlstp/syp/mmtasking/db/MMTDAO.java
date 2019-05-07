@@ -6,6 +6,8 @@
 package at.htlstp.syp.mmtasking.db;
 
 import at.htlstp.syp.mmtasking.model.Appointment;
+import at.htlstp.syp.mmtasking.model.Category;
+import at.htlstp.syp.mmtasking.model.Location;
 import at.htlstp.syp.mmtasking.model.Task;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -207,5 +209,26 @@ public class MMTDAO implements IMMTDAO {
             em.close();
         }
     }
+    
+    public List<Category> getCategoriesforAnalyse(){
+        List<Category> categories = new ArrayList<>();
+
+        EntityManager em = JPAUtil.getEMF().createEntityManager();
+        TypedQuery<Category> jQuery = em.createQuery("select c from Category c", Category.class
+        );
+        return categories = jQuery.getResultList();  
+    }
+    
+    public List<Location> getLocationsforAnalyse(){
+        List<Location> locations = new ArrayList<>();
+
+        EntityManager em = JPAUtil.getEMF().createEntityManager();
+        TypedQuery<Location> jQuery = em.createQuery("select l from Location l", Location.class
+        );
+        return locations = jQuery.getResultList();  
+    }
+    
+    
+    
 
 }
