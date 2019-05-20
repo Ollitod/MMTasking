@@ -5,8 +5,10 @@
  */
 package at.htlstp.syp.mmtasking.controller;
 
+import at.htlstp.syp.mmtasking.db.MMTDAO;
 import at.htlstp.syp.mmtasking.model.Appointment;
 import at.htlstp.syp.mmtasking.model.Category;
+import at.htlstp.syp.mmtasking.model.Location;
 import at.htlstp.syp.mmtasking.model.Task;
 import at.htlstp.syp.mmtasking.model.TaskPriority;
 import com.jfoenix.controls.JFXCheckBox;
@@ -16,6 +18,7 @@ import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXTimePicker;
 import eu.hansolo.enzo.notification.Notification.Notifier;
+import java.io.IOException;
 import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -25,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -35,13 +40,21 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.Priority;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
@@ -68,11 +81,11 @@ public class MainAppController implements Initializable {
     @FXML
     private ChoiceBox<Category> cbKategorie;
     @FXML
-    private ChoiceBox<?> cbOrt;
+    private ChoiceBox<Location> cbOrt;
     @FXML
     private Button btnAuswerten;
     @FXML
-    private ChoiceBox<String> cbPriority;
+    private ChoiceBox<TaskPriority> cbPriority;
     @FXML
     private JFXTextField tfTaskD;
     @FXML
@@ -83,8 +96,6 @@ public class MainAppController implements Initializable {
     private JFXDatePicker dateBis;
     @FXML
     private JFXTimePicker timeBis;
-    @FXML
-    private JFXTextField tfOrt;
     @FXML
     private JFXTextArea taComment;
     @FXML
@@ -118,6 +129,19 @@ public class MainAppController implements Initializable {
     private Button btnEdit;
     @FXML
     private Button btnFinalize;
+    
+    MMTDAO dao = new MMTDAO();
+    @FXML
+    private MenuItem menuTask;
+    @FXML
+    private MenuItem menuApp;
+    @FXML
+    private ChoiceBox<Location> chbPrefLoc;
+    @FXML
+    private ChoiceBox<Category> cbCategory;
+    @FXML
+    private ChoiceBox<Location> cbLocs;
+    
 
     /**
      * Initializes the controller class.
@@ -125,12 +149,16 @@ public class MainAppController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         LocalDateTime current;
-
+        
+        lblCurrentUser.setText("Current User: Alexandra Meinhard");
+        
         initTimeTimeline();
         initDateTimeline();
 
         initFinalizing();
-
+        
+        setUpEnv();
+        
         btnFinalize.setOnAction((ActionEvent e) -> {
             Task t = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
             t.finalizeTask();
@@ -140,7 +168,8 @@ public class MainAppController implements Initializable {
         btnEdit.setOnAction(e -> {
             Task task = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
             tfTaskD.setText(task.getTitle());
-            tfKategorieD.setText(task.getCategory());
+            //cbCategory.getItems().contains(task.getCategory());
+            //cbCategory.setSelectionModel();
             dateVon.setValue(task.getBeginning().toLocalDate());
             dateBis.setValue(task.getEnd().toLocalDate());
             timeVon.setValue(task.getBeginning().toLocalTime());
@@ -151,12 +180,11 @@ public class MainAppController implements Initializable {
 
             tabPane.getSelectionModel().select(1);
         });
-
-        checkboxes = Arrays.asList(cbHoch, cbMittel, cbNiedrig);
-        cbHoch.setOnAction(e -> changePriority(cbHoch));
-        cbMittel.setOnAction(e -> changePriority(cbMittel));
-        cbNiedrig.setOnAction(e -> changePriority(cbNiedrig));
-
+        
+        setupAnalyse();
+        
+        
+        
 //        LocalDateTime future = LocalDateTime.now().plusMinutes(15);
 //        logoutTime = Instant.now();
 //        autologout = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
@@ -188,15 +216,15 @@ public class MainAppController implements Initializable {
 
     private void initFinalizing() {
         List<Task> taskliste = new ArrayList<>();
-        taskliste.add(new Task("Task 1", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
-        taskliste.add(new Task("Task 2", LocalDateTime.now(), LocalDateTime.now().plusDays(4), null, "Priorisieren", TaskPriority.LOW, "Commentar 2", false, false));
-        taskliste.add(new Task("Task 3", LocalDateTime.now(), LocalDateTime.now().plusDays(3), null, "Aufsetzen", TaskPriority.HIGH, "Commentar 3", true, false));
-        taskliste.add(new Task("Task 4", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
-        taskliste.add(new Task("Task 5", LocalDateTime.now(), LocalDateTime.now().plusDays(4), null, "Priorisieren", TaskPriority.LOW, "Commentar 2", false, false));
-        taskliste.add(new Task("Task 6", LocalDateTime.now(), LocalDateTime.now().plusDays(3), null, "Aufsetzen", TaskPriority.HIGH, "Commentar 3", true, false));
-        taskliste.add(new Task("Task 7", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
-        taskliste.add(new Task("Task 8", LocalDateTime.now(), LocalDateTime.now().plusDays(4), null, "Priorisieren", TaskPriority.LOW, "Commentar 2", false, false));
-        taskliste.add(new Task("Task 9", LocalDateTime.now(), LocalDateTime.now().plusDays(3), null, "Aufsetzen", TaskPriority.HIGH, "Commentar 3", true, false));
+        taskliste.add(new Task("Task 1", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, new Category("Fixen"), TaskPriority.MEDIUM, "Commentar 1", false, false));
+        taskliste.add(new Task("Task 2", LocalDateTime.now(), LocalDateTime.now().plusDays(4), null, new Category("Priorisieren"), TaskPriority.LOW, "Commentar 2", false, false));
+        taskliste.add(new Task("Task 3", LocalDateTime.now(), LocalDateTime.now().plusDays(3), null, new Category("Aufsetzen"), TaskPriority.HIGH, "Commentar 3", true, false));
+        taskliste.add(new Task("Task 4", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, new Category("Fixen"), TaskPriority.MEDIUM, "Commentar 1", false, false));
+        taskliste.add(new Task("Task 5", LocalDateTime.now(), LocalDateTime.now().plusDays(4), null, new Category("Priorisieren"), TaskPriority.LOW, "Commentar 2", false, false));
+        taskliste.add(new Task("Task 6", LocalDateTime.now(), LocalDateTime.now().plusDays(3), null, new Category("Aufsetzen"), TaskPriority.HIGH, "Commentar 3", true, false));
+        taskliste.add(new Task("Task 7", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, new Category("Fixen"), TaskPriority.MEDIUM, "Commentar 1", false, false));
+        taskliste.add(new Task("Task 8", LocalDateTime.now(), LocalDateTime.now().plusDays(4), null, new Category("Priorisieren"), TaskPriority.LOW, "Commentar 2", false, false));
+        taskliste.add(new Task("Task 9", LocalDateTime.now(), LocalDateTime.now().plusDays(3), null, new Category("Aufsetzen"), TaskPriority.HIGH, "Commentar 3", true, false));
         taskliste = taskliste.stream()
                 .filter(t -> !t.isFinalized())
                 .collect(Collectors.toList());
@@ -241,17 +269,29 @@ public class MainAppController implements Initializable {
 
     private void setUpTaskM() {
         List<Task> taskliste = new ArrayList<>();
-        taskliste.add(new Task("Task 1", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
-        taskliste.add(new Task("Task 2", LocalDateTime.now(), LocalDateTime.now().plusDays(4), null, "Priorisieren", TaskPriority.LOW, "Commentar 2", false, false));
-        taskliste.add(new Task("Task 3", LocalDateTime.now(), LocalDateTime.now().plusDays(3), null, "Aufsetzen", TaskPriority.HIGH, "Commentar 3", true, false));
+        taskliste.add(new Task("Task 1", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, new Category("Fixen"), TaskPriority.MEDIUM, "Commentar 1", false, false));
+        taskliste.add(new Task("Task 2", LocalDateTime.now(), LocalDateTime.now().plusDays(4), null, new Category("Priorisieren"), TaskPriority.LOW, "Commentar 2", false, false));
+        taskliste.add(new Task("Task 3", LocalDateTime.now(), LocalDateTime.now().plusDays(3), null, new Category("Aufsetzen"), TaskPriority.HIGH, "Commentar 3", true, false));
 
+        cbHoch.setOnMouseClicked((event) -> {
+                    changePriority(TaskPriority.HIGH);
+        });
+        
+        cbMittel.setOnMouseClicked((event) -> {
+                    changePriority(TaskPriority.MEDIUM);
+        });
+        
+        cbNiedrig.setOnMouseClicked((event) -> {
+                    changePriority(TaskPriority.LOW);
+        });
+        
         ObservableList<Task> tasks = FXCollections.observableArrayList(taskliste);
         lvTaskM.setItems(tasks);
         lvTaskM.getSelectionModel().selectedItemProperty().addListener(listener -> {
             Task task = lvTaskM.getSelectionModel().getSelectedItem();
             
             tfTaskD.setText(task.getTitle());
-            tfKategorieD.setText(task.getCategory());
+            //tfKategorieD.setText(task.getCategory()); //JM: added toString
             dateVon.setValue(task.getBeginning().toLocalDate());
             dateBis.setValue(task.getEnd().toLocalDate());
             timeVon.setValue(task.getBeginning().toLocalTime());
@@ -336,17 +376,6 @@ public class MainAppController implements Initializable {
                 cbNiedrig.setSelected(true);
                 break;
         }
-//        if (cbHoch.isArmed()) {
-//            cbMittel.disarm();
-//            cbNiedrig.disarm();
-//        } else if (cbMittel.isArmed()) {
-//            cbHoch.disarm();
-//            cbNiedrig.disarm();
-//        } else if (cbNiedrig.isArmed()) {
-//            cbHoch.disarm();
-//            cbMittel.disarm();
-//        }
-
     }
 
     public Timeline getClock() {
@@ -360,5 +389,96 @@ public class MainAppController implements Initializable {
     public Timeline getAutologout() {
         return autologout;
     }
+    
+    public void setupCategoryDropdown(){
+        
+        //ObservableList<Category> cat = FXCollections.observableArrayList(dao.getCategoriesforAnalyse());
+        //cbKategorie.setItems(cat);
+    }
+    
+    public void setupLocationDropdown(){
+        
+        //ObservableList<Location> cat = FXCollections.observableArrayList(dao.getLocationsforAnalyse());
+        //cbOrt.setItems(cat);
+    }
+    
+    public void setupPriorityDropdown(){
+        
+        ObservableList<TaskPriority> cat = FXCollections.observableArrayList();
+        cat.add(TaskPriority.HIGH);
+        cat.add(TaskPriority.MEDIUM);
+        cat.add(TaskPriority.LOW);
+        cbPriority.setItems(cat);
+    }
 
+    private void setupAnalyse() {
+        setupCategoryDropdown();
+        setupLocationDropdown();
+        setupPriorityDropdown();
+    }
+
+    @FXML
+    private void openTaskDialog(ActionEvent event) {
+        
+                Stage stage = new Stage();
+                Parent root = null;
+                try {
+                    root = FXMLLoader.load(getClass().getResource("/AddTask.fxml"));
+                } catch (IOException ex) {
+                    System.err.println("Task Dialog fail");
+                    //Logger.getLogger(this.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                Scene scene = new Scene(root);
+                stage.setScene(scene);
+                stage.show();    
+    }
+
+    @FXML
+    private void openAppDialog(ActionEvent event) {
+         Stage stage = new Stage();
+                Parent root = null;
+                try {
+                    root = FXMLLoader.load(getClass().getResource("/AddApp.fxml"));
+                } catch (IOException ex) {
+                    System.err.println("Appointment Dialog fail");
+                    //Logger.getLogger(this.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                Scene scene = new Scene(root);
+                stage.setScene(scene);
+                stage.show(); 
+
+    }
+    
+        private void setUpEnv() {
+
+        ObservableList<Location> locs = FXCollections.observableArrayList();
+        //locs.addAll(dao.getAllLocation());
+        locs.add(new Location("Irnfritz"));
+        cbLocs.setItems(locs);
+        
+        ObservableList<Category> cat = FXCollections.observableArrayList();
+        //locs.addAll(dao.getAllCategories());
+        cat.add(new Category("Test"));
+        cbCategory.setItems(cat);
+        
+        
+
+    }
+
+    @FXML
+    private void helpClicked(ActionEvent event) {
+        
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText("MMT Solutions - NO RIGHTS RESERVED");
+        alert.setTitle("Help");
+        alert.show();
+        
+        
+    }
+            
+      
+    
+    
 }

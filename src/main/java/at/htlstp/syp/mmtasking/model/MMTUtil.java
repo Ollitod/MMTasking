@@ -32,7 +32,7 @@ public class MMTUtil {
         LocalDateTime beginning = LocalDateTime.parse(token[1], FORMATTER);
         LocalDateTime end = LocalDateTime.parse(token[2], FORMATTER);
         Location location = new Location(token[3]);
-        String category = token[4];
+        Category category = new Category(token[4]);
         TaskPriority priority = TaskPriority.valueOf(token[5]);
         String note = token[6];
         boolean deletable = Boolean.parseBoolean(token[7]);

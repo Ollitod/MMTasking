@@ -52,6 +52,4 @@ public class MainApp extends Application {
         controller.getDate().stop();
 //        controller.getAutologout().stop();
     }
-
-    
 }

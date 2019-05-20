@@ -44,4 +44,12 @@ public class Category implements Comparable<Category> {
     public int compareTo(Category o) {
         return this.name.compareTo(o.name);
     }
+
+    @Override
+    public String toString() {
+        //return "Category{" + "id=" + id + ", name=" + name + '}';
+        return name;
+    }
+    
+    
 }

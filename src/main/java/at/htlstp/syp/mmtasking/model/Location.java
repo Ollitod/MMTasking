@@ -41,7 +41,8 @@ public class Location implements Serializable {
 
     @Override
     public String toString() {
-        return "Location{" + "name=" + name + '}';
+        //return "Location{" + "name=" + name + '}';
+        return name;
     }
     
     
