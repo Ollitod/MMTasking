@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXDatePicker?>
+<?import com.jfoenix.controls.JFXTextArea?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import com.jfoenix.controls.JFXTimePicker?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="AnchorPane" prefHeight="325.0" prefWidth="272.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.htlstp.syp.mmtasking.controller.AddAppController">
+   <children>
+      <JFXTextField fx:id="tf_termin" layoutX="40.0" layoutY="21.0" prefHeight="27.0" prefWidth="153.0" promptText="Termin Name" />
+      <JFXDatePicker fx:id="date" layoutX="41.0" layoutY="67.0" promptText="Datum" />
+      <JFXTimePicker fx:id="time" layoutX="41.0" layoutY="111.0" promptText="Uhrezit" />
+      <JFXButton fx:id="addApp" layoutX="12.0" layoutY="284.0" onAction="#doAddApp" prefHeight="27.0" prefWidth="248.0" text="Hinzufügen" />
+      <JFXTextArea fx:id="note" layoutX="40.0" layoutY="203.0" prefHeight="70.0" prefWidth="153.0" />
+      <ChoiceBox fx:id="cb_Loc" layoutX="42.0" layoutY="163.0" prefHeight="27.0" prefWidth="153.0" />
+   </children>
+</AnchorPane>

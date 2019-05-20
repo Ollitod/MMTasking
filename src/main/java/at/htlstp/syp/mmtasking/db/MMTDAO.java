@@ -25,7 +25,13 @@ public class MMTDAO implements IMMTDAO {
     @Override
     public List<Task> getAllTasks() {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Task> jQuery = em.createQuery("select t from Task", Task.class);
+        TypedQuery<Task> jQuery = em.createQuery("select t from Task t", Task.class);
+        return jQuery.getResultList();
+    }
+    
+    public List<Location> getAllLocation() {
+        EntityManager em = JPAUtil.getEMF().createEntityManager();
+        TypedQuery<Location> jQuery = em.createQuery("select l from Location l ", Location.class);
         return jQuery.getResultList();
     }
 
@@ -226,6 +232,12 @@ public class MMTDAO implements IMMTDAO {
         TypedQuery<Location> jQuery = em.createQuery("select l from Location l", Location.class
         );
         return locations = jQuery.getResultList();  
+    }
+
+    public List<Category> getAllCategories() {
+         EntityManager em = JPAUtil.getEMF().createEntityManager();
+        TypedQuery<Category> jQuery = em.createQuery("select c from Category c ", Category.class);
+        return jQuery.getResultList();
     }
     
     

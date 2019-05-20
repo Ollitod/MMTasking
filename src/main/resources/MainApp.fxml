@@ -27,7 +27,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.htlstp.syp.mmtasking.controller.MainAppController">
+<VBox prefHeight="600.0" prefWidth="908.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.htlstp.syp.mmtasking.controller.MainAppController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
@@ -63,14 +63,20 @@
         </Menu>
         <Menu mnemonicParsing="false" text="Help">
           <items>
-            <MenuItem mnemonicParsing="false" text="About MyHelloApp" />
+            <MenuItem mnemonicParsing="false" onAction="#helpClicked" text="About MMTasking" />
           </items>
         </Menu>
+            <Menu mnemonicParsing="false" text="Manage">
+              <items>
+                <MenuItem fx:id="menuTask" mnemonicParsing="false" onAction="#openTaskDialog" text="Task hinzufügen" />
+                  <MenuItem fx:id="menuApp" mnemonicParsing="false" onAction="#openAppDialog" text="Termin hinzufügen" />
+              </items>
+            </Menu>
       </menus>
     </MenuBar>
       <AnchorPane prefHeight="116.0" prefWidth="900.0">
          <children>
-            <Label fx:id="lblCurrentUser" alignment="CENTER_RIGHT" layoutX="516.0" layoutY="13.0" prefHeight="17.0" prefWidth="312.0" text="Logged in User: default" textAlignment="JUSTIFY" />
+            <Label fx:id="lblCurrentUser" alignment="CENTER_RIGHT" layoutX="557.0" layoutY="13.0" prefHeight="17.0" prefWidth="312.0" text="Logged in User: default" textAlignment="JUSTIFY" />
             <Label fx:id="lblAutoLogout" layoutX="22.0" layoutY="11.0" prefHeight="17.0" prefWidth="147.0" text="Auto Logout: 00:14:59" />
             <ImageView fitHeight="25.0" fitWidth="35.0" layoutX="851.0" layoutY="9.0" pickOnBounds="true" preserveRatio="true">
                <image>
@@ -79,11 +85,11 @@
             </ImageView>
          </children>
       </AnchorPane>
-      <TabPane fx:id="tabPane" prefHeight="606.0" prefWidth="900.0" tabClosingPolicy="UNAVAILABLE">
+      <TabPane fx:id="tabPane" prefHeight="604.0" prefWidth="900.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="Startseite">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="509.0" prefWidth="900.0">
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="497.0" prefWidth="900.0">
                      <children>
                         <Label layoutX="24.0" layoutY="32.0" prefHeight="31.0" prefWidth="626.0" text="Tasks für die kommende Woche">
                            <font>
@@ -91,7 +97,7 @@
                            </font>
                         </Label>
                         <ListView fx:id="lvTaskM" layoutX="25.0" layoutY="71.0" prefHeight="199.0" prefWidth="653.0" />
-                        <Label fx:id="lblTime" layoutX="713.0" layoutY="215.0" prefHeight="64.0" prefWidth="153.0" text="23:59:59">
+                        <Label fx:id="lblTime" layoutX="713.0" layoutY="215.0" prefHeight="64.0" prefWidth="175.0" text="23:59:59">
                            <font>
                               <Font name="System Bold" size="38.0" />
                            </font>
@@ -102,7 +108,7 @@
                            </font>
                         </Label>
                         <ListView fx:id="lvTerminM" layoutX="26.0" layoutY="349.0" prefHeight="101.0" prefWidth="658.0" />
-                        <Label fx:id="lblDate" layoutX="722.0" layoutY="269.0" prefHeight="17.0" prefWidth="136.0" text="Mittwoch, 31.12.2019">
+                        <Label fx:id="lblDate" layoutX="722.0" layoutY="269.0" prefHeight="18.0" prefWidth="147.0" text="Mittwoch, 31.12.2019">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -145,12 +151,11 @@
                            </font>
                         </Label>
                         <JFXTimePicker fx:id="timeBis" defaultColor="BLACK" layoutX="378.0" layoutY="189.0" prefHeight="29.0" prefWidth="176.0" promptText="time" />
-                        <Label layoutX="49.0" layoutY="230.0" text="Ort">
+                        <Label layoutX="46.0" layoutY="232.0" text="Ort">
                            <font>
                               <Font size="15.0" />
                            </font>
                         </Label>
-                        <JFXTextField fx:id="tfOrt" layoutX="101.0" layoutY="229.0" prefHeight="27.0" prefWidth="81.0" promptText="ort" />
                         <JFXTextArea fx:id="taComment" layoutX="297.0" layoutY="307.0" prefHeight="142.0" prefWidth="324.0" promptText="comment" />
                         <Label fx:id="lblFahrzeit" layoutX="344.0" layoutY="232.0" prefHeight="19.0" prefWidth="230.0" text="Die Fahrzeit beträgt: xxhxxm">
                            <font>
@@ -170,7 +175,6 @@
                               <Font size="15.0" />
                            </font>
                         </Label>
-                        <JFXTextField fx:id="tfKategorieD" layoutX="343.0" layoutY="92.0" prefHeight="27.0" prefWidth="271.0" promptText="kategorie" />
                         <Label layoutX="48.0" layoutY="386.0" text="Dieser Task ist:">
                            <font>
                               <Font size="15.0" />
@@ -180,6 +184,8 @@
                         <JFXCheckBox fx:id="cbDeleteable" checkedColor="BLACK" layoutX="48.0" layoutY="416.0" text="Löschbar" unCheckedColor="BLACK" />
                         <Separator layoutX="30.0" layoutY="83.0" prefHeight="0.0" prefWidth="587.0" />
                         <Button layoutX="44.0" layoutY="465.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="579.0" text="Übernehmen" />
+                        <ChoiceBox fx:id="cbCategory" layoutX="357.0" layoutY="92.0" prefHeight="27.0" prefWidth="195.0" />
+                        <ChoiceBox fx:id="cbLocs" layoutX="97.0" layoutY="228.0" prefHeight="27.0" prefWidth="167.0" />
                      </children></AnchorPane>
             </content>
           </Tab>
@@ -280,13 +286,13 @@
                               <Font size="15.0" />
                            </font>
                         </Label>
-                        <JFXToggleButton layoutX="244.0" layoutY="110.0" text="Dektiviert" />
+                        <JFXToggleButton disable="true" layoutX="244.0" layoutY="110.0" selected="true" text="Dektiviert" />
                         <Label layoutX="45.0" layoutY="170.0" prefHeight="25.0" prefWidth="189.0" text="Automatisches Löschen:">
                            <font>
                               <Font size="15.0" />
                            </font>
                         </Label>
-                        <JFXToggleButton layoutX="245.0" layoutY="153.0" text="Dektiviert" />
+                        <JFXToggleButton disable="true" layoutX="245.0" layoutY="153.0" selected="true" text="Dektiviert" />
                         <Separator layoutX="38.0" layoutY="110.0" prefHeight="15.0" prefWidth="348.0" />
                         <Separator layoutX="40.0" layoutY="205.0" prefHeight="15.0" prefWidth="348.0" />
                         <Label layoutX="43.0" layoutY="87.0" text="Löschen">
@@ -294,45 +300,45 @@
                               <Font size="20.0" />
                            </font>
                         </Label>
-                        <Label layoutX="430.0" layoutY="87.0" text="Benachrichtigungen">
+                        <Label layoutX="40.0" layoutY="241.0" text="Benachrichtigungen">
                            <font>
                               <Font size="20.0" />
                            </font>
                         </Label>
-                        <Separator layoutX="430.0" layoutY="109.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Separator layoutX="427.0" layoutY="204.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Label layoutX="40.0" layoutY="239.0" text="Speichern">
+                        <Separator layoutX="40.0" layoutY="263.0" prefHeight="15.0" prefWidth="348.0" />
+                        <Separator layoutX="37.0" layoutY="358.0" prefHeight="15.0" prefWidth="348.0" />
+                        <Label layoutX="425.0" layoutY="239.0" text="Speichern">
                            <font>
                               <Font size="20.0" />
                            </font>
                         </Label>
-                        <Separator layoutX="40.0" layoutY="261.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Separator layoutX="37.0" layoutY="356.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Label layoutX="432.0" layoutY="238.0" text="Task hinzufügen">
+                        <Separator layoutX="425.0" layoutY="261.0" prefHeight="15.0" prefWidth="348.0" />
+                        <Separator layoutX="422.0" layoutY="358.0" prefHeight="15.0" prefWidth="348.0" />
+                        <Label layoutX="427.0" layoutY="86.0" text="Task hinzufügen">
                            <font>
                               <Font size="20.0" />
                            </font>
                         </Label>
-                        <Separator layoutX="432.0" layoutY="262.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Separator layoutX="428.0" layoutY="356.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Label layoutX="432.0" layoutY="280.0" prefHeight="25.0" prefWidth="199.0" text="Bevorzugter Standort:">
+                        <Separator layoutX="427.0" layoutY="110.0" prefHeight="15.0" prefWidth="348.0" />
+                        <Separator layoutX="423.0" layoutY="204.0" prefHeight="15.0" prefWidth="348.0" />
+                        <Label layoutX="427.0" layoutY="128.0" prefHeight="25.0" prefWidth="199.0" text="Bevorzugter Standort:">
                            <font>
                               <Font size="15.0" />
                            </font>
                         </Label>
-                        <Label layoutX="432.0" layoutY="319.0" prefHeight="25.0" prefWidth="199.0" text="Fahrzeit automatisch:">
+                        <Label layoutX="427.0" layoutY="167.0" prefHeight="25.0" prefWidth="199.0" text="Fahrzeit automatisch:">
                            <font>
                               <Font size="15.0" />
                            </font>
                         </Label>
-                        <JFXToggleButton layoutX="618.0" layoutY="302.0" text="Dektiviert" />
-                        <Label layoutX="432.0" layoutY="128.0" prefHeight="25.0" prefWidth="199.0" text="Finalisierungserinnerung">
+                        <JFXToggleButton layoutX="610.0" layoutY="153.0" text="Dektiviert" />
+                        <Label layoutX="42.0" layoutY="282.0" prefHeight="25.0" prefWidth="199.0" text="Finalisierungserinnerung">
                            <font>
                               <Font size="15.0" />
                            </font>
                         </Label>
-                        <ChoiceBox layoutX="628.0" layoutY="128.0" prefHeight="27.0" prefWidth="147.0" />
-                        <ChoiceBox fx:id="chbPrefLoc" layoutX="628.0" layoutY="279.0" prefHeight="27.0" prefWidth="147.0" />
+                        <ChoiceBox layoutX="238.0" layoutY="282.0" prefHeight="27.0" prefWidth="147.0" />
+                        <ChoiceBox fx:id="chbPrefLoc" layoutX="610.0" layoutY="128.0" prefHeight="27.0" prefWidth="147.0" />
                      </children>
                   </AnchorPane>
               </content>
