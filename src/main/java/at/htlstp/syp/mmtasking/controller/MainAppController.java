@@ -105,8 +105,6 @@ public class MainAppController implements Initializable {
     @FXML
     private JFXCheckBox cbNiedrig;
     @FXML
-    private JFXTextField tfKategorieD;
-    @FXML
     private JFXCheckBox cbDeleteable;
     @FXML
     private JFXListView<Task> lvAusstehendeTasks;
@@ -129,6 +127,18 @@ public class MainAppController implements Initializable {
     private Button btnEdit;
     @FXML
     private Button btnFinalize;
+    
+    MMTDAO dao = new MMTDAO();
+    @FXML
+    private MenuItem menuTask;
+    @FXML
+    private MenuItem menuApp;
+    @FXML
+    private ChoiceBox<Location> chbPrefLoc;
+    @FXML
+    private ChoiceBox<Category> cbCategory;
+    @FXML
+    private ChoiceBox<Location> cbLocs;
     
     MMTDAO dao = new MMTDAO();
     @FXML
@@ -304,47 +314,13 @@ public class MainAppController implements Initializable {
         });
     }
 
-    private void changePriority(CheckBox trigger) {
-
-        for (JFXCheckBox cb : checkboxes) {
-            cb.setSelected(false);
-            if (cb.equals(trigger)) {
-                cb.setSelected(true);
-            }
-        }
-//        cbHoch.setSelected(false);
-//        cbMittel.setSelected(false);
-//        cbNiedrig.setSelected(false);
-
-        Notifier.INSTANCE.notifyInfo("Info", "This is an info");
-
-//        for (TaskPriority p : priority.values()) {
-//            if (p.equals(priority)) {
-//                
-//            }
-//        }
-//        switch (priority) {
-//            case HIGH:
-//                cbHoch.setSelected(true);
-//                break;
-//            case MEDIUM:
-//                cbMittel.setSelected(true);
-//                break;
-//            case LOW:
-//                cbNiedrig.setSelected(true);
-//                break;
-//        }
-//        if (cbHoch.isArmed()) {
-//            cbMittel.disarm();
-//            cbNiedrig.disarm();
-//        } else if (cbMittel.isArmed()) {
-//            cbHoch.disarm();
-//            cbNiedrig.disarm();
-//        } else if (cbNiedrig.isArmed()) {
-//            cbHoch.disarm();
-//            cbMittel.disarm();
-//        }
-    }
+    private void changePriority(TaskPriority priority) {
+        
+        cbHoch.setSelected(false);
+        cbMittel.setSelected(false);
+        cbNiedrig.setSelected(false);
+        
+        //Notifier.INSTANCE.notifyInfo("Info", "This is an info");
 
     private void changePriority(TaskPriority priority) {
 

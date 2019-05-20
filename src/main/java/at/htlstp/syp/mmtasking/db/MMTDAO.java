@@ -237,6 +237,12 @@ public class MMTDAO implements IMMTDAO {
         TypedQuery<Category> jQuery = em.createQuery("select c from Category c ", Category.class);
         return jQuery.getResultList();
     }
+
+    public List<Category> getAllCategories() {
+         EntityManager em = JPAUtil.getEMF().createEntityManager();
+        TypedQuery<Category> jQuery = em.createQuery("select c from Category c ", Category.class);
+        return jQuery.getResultList();
+    }
     
     
     
