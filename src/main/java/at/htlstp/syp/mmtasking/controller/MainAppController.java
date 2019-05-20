@@ -29,12 +29,15 @@ import java.util.stream.Collectors;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -109,13 +112,12 @@ public class MainAppController implements Initializable {
     private Instant logoutTime;
     @FXML
     private TabPane tabPane;
-    
-    private List<JFXCheckBox> checkboxes = Arrays.asList(cbHoch, cbMittel, cbNiedrig);
+
+    private List<JFXCheckBox> checkboxes;
     @FXML
     private Button btnEdit;
     @FXML
     private Button btnFinalize;
-    
 
     /**
      * Initializes the controller class.
@@ -123,18 +125,18 @@ public class MainAppController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         LocalDateTime current;
-        
+
         initTimeTimeline();
         initDateTimeline();
-        
+
         initFinalizing();
-        
+
         btnFinalize.setOnAction((ActionEvent e) -> {
             Task t = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
             t.finalizeTask();
             lvAusstehendeTasks.getItems().remove(t);
         });
-        
+
         btnEdit.setOnAction(e -> {
             Task task = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
             tfTaskD.setText(task.getTitle());
@@ -146,12 +148,15 @@ public class MainAppController implements Initializable {
             changePriority(task.getPriority());
             cbDeleteable.setSelected(task.isDeletable());
             taComment.setText(task.getNote());
-            
+
             tabPane.getSelectionModel().select(1);
         });
-        
-        
-        
+
+        checkboxes = Arrays.asList(cbHoch, cbMittel, cbNiedrig);
+        cbHoch.setOnAction(e -> changePriority(cbHoch));
+        cbMittel.setOnAction(e -> changePriority(cbMittel));
+        cbNiedrig.setOnAction(e -> changePriority(cbNiedrig));
+
 //        LocalDateTime future = LocalDateTime.now().plusMinutes(15);
 //        logoutTime = Instant.now();
 //        autologout = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
@@ -160,7 +165,6 @@ public class MainAppController implements Initializable {
 //        }));
 //        autologout.setCycleCount(15 * 60);
 //        autologout.play();
-
         // Autologut
 //        Timer timer = new Timer();
 //        timer.sch
@@ -218,6 +222,23 @@ public class MainAppController implements Initializable {
         clock.play();
     }
 
+//    private InvalidationListener taskListener = (l) -> {
+//        l.
+//        Task task = lvTaskM.getSelectionModel().getSelectedItem();
+//
+//        tfTaskD.setText(task.getTitle());
+//        tfKategorieD.setText(task.getCategory());
+//        dateVon.setValue(task.getBeginning().toLocalDate());
+//        dateBis.setValue(task.getEnd().toLocalDate());
+//        timeVon.setValue(task.getBeginning().toLocalTime());
+//        timeBis.setValue(task.getEnd().toLocalTime());
+//        changePriority(task.getPriority());
+//        cbDeleteable.setSelected(task.isDeletable());
+//        taComment.setText(task.getNote());
+//
+//        tabPane.getSelectionModel().select(1);
+//    }
+
     private void setUpTaskM() {
         List<Task> taskliste = new ArrayList<>();
         taskliste.add(new Task("Task 1", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
@@ -228,6 +249,7 @@ public class MainAppController implements Initializable {
         lvTaskM.setItems(tasks);
         lvTaskM.getSelectionModel().selectedItemProperty().addListener(listener -> {
             Task task = lvTaskM.getSelectionModel().getSelectedItem();
+            
             tfTaskD.setText(task.getTitle());
             tfKategorieD.setText(task.getCategory());
             dateVon.setValue(task.getBeginning().toLocalDate());
@@ -237,30 +259,72 @@ public class MainAppController implements Initializable {
             changePriority(task.getPriority());
             cbDeleteable.setSelected(task.isDeletable());
             taComment.setText(task.getNote());
-            
+
             tabPane.getSelectionModel().select(1);
         });
     }
 
-    private void changePriority(TaskPriority priority) {
-        
-//        for (JFXCheckBox cb : checkboxes) {
-//            if (cb.isSelected()) {
-//                
-//            }
-//        }
-        cbHoch.setSelected(false);
-        cbMittel.setSelected(false);
-        cbNiedrig.setSelected(false);
-        
+    private void changePriority(CheckBox trigger) {
+
+        for (JFXCheckBox cb : checkboxes) {
+            cb.setSelected(false);
+            if (cb.equals(trigger)) {
+                cb.setSelected(true);
+            }
+        }
+//        cbHoch.setSelected(false);
+//        cbMittel.setSelected(false);
+//        cbNiedrig.setSelected(false);
+
         Notifier.INSTANCE.notifyInfo("Info", "This is an info");
-        
+
 //        for (TaskPriority p : priority.values()) {
 //            if (p.equals(priority)) {
 //                
 //            }
 //        }
+//        switch (priority) {
+//            case HIGH:
+//                cbHoch.setSelected(true);
+//                break;
+//            case MEDIUM:
+//                cbMittel.setSelected(true);
+//                break;
+//            case LOW:
+//                cbNiedrig.setSelected(true);
+//                break;
+//        }
+//        if (cbHoch.isArmed()) {
+//            cbMittel.disarm();
+//            cbNiedrig.disarm();
+//        } else if (cbMittel.isArmed()) {
+//            cbHoch.disarm();
+//            cbNiedrig.disarm();
+//        } else if (cbNiedrig.isArmed()) {
+//            cbHoch.disarm();
+//            cbMittel.disarm();
+//        }
+    }
 
+    private void changePriority(TaskPriority priority) {
+
+//        for (JFXCheckBox cb : checkboxes) {
+//            cb.setSelected(false);
+//            if (cb.equals(trigger)) {
+//                cb.setSelected(true);
+//            }
+//        }
+        cbHoch.setSelected(false);
+        cbMittel.setSelected(false);
+        cbNiedrig.setSelected(false);
+
+        Notifier.INSTANCE.notifyInfo("Info", "This is an info");
+
+//        for (TaskPriority p : priority.values()) {
+//            if (p.equals(priority)) {
+//                
+//            }
+//        }
         switch (priority) {
             case HIGH:
                 cbHoch.setSelected(true);
@@ -296,6 +360,5 @@ public class MainAppController implements Initializable {
     public Timeline getAutologout() {
         return autologout;
     }
-    
-    
+
 }

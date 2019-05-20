@@ -50,7 +50,7 @@ public class MainApp extends Application {
         super.stop();
         controller.getClock().stop();
         controller.getDate().stop();
-        controller.getAutologout().stop();
+//        controller.getAutologout().stop();
     }
 
     

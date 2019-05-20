@@ -214,18 +214,16 @@ public class MMTDAO implements IMMTDAO {
         List<Category> categories = new ArrayList<>();
 
         EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Category> jQuery = em.createQuery("select c from Category c", Category.class
-        );
-        return categories = jQuery.getResultList();  
+        TypedQuery<Category> jQuery = em.createQuery("select c from Category c", Category.class);
+        return jQuery.getResultList();  
     }
     
     public List<Location> getLocationsforAnalyse(){
         List<Location> locations = new ArrayList<>();
 
         EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Location> jQuery = em.createQuery("select l from Location l", Location.class
-        );
-        return locations = jQuery.getResultList();  
+        TypedQuery<Location> jQuery = em.createQuery("select l from Location l", Location.class);
+        return jQuery.getResultList();  
     }
     
     
