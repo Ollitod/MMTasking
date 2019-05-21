@@ -21,25 +21,6 @@ public class MMTUtil {
         
     }
     
-    public static Task createTaskFromCSV(String line) {
-        String[] token = line.split(";");
-        
-        if (token.length != 8) {
-            // exception
-        }
-        
-        String title = token[0];
-        LocalDateTime beginning = LocalDateTime.parse(token[1], FORMATTER);
-        LocalDateTime end = LocalDateTime.parse(token[2], FORMATTER);
-        Location location = new Location(token[3]);
-        Category category = new Category(token[4]);
-        TaskPriority priority = TaskPriority.valueOf(token[5]);
-        String note = token[6];
-        boolean deletable = Boolean.parseBoolean(token[7]);
-        boolean finalized = Boolean.parseBoolean(token[8]);
-        
-        return new Task(title, beginning, end, location, category, priority, note, deletable, finalized);
-    }
     
     public static Appointment createAppointmentFromCSV(String line) {
         String[] token = line.split(";");

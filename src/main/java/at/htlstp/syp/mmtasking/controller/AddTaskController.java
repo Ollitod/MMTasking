@@ -91,8 +91,7 @@ public class AddTaskController implements Initializable {
         try {
             LocalDateTime von = LocalDateTime.of(dateBegin.getValue(), timeBegin.getValue());
             LocalDateTime bis = LocalDateTime.of(dateEnd.getValue(), timeEnd.getValue());
-            t = new Task(taskName.getText(), von, bis, 
-                cbLocs.getSelectionModel().getSelectedItem(), cbCategory.getSelectionModel().getSelectedItem(),
+            t = new Task(taskName.getText(), von, bis, cbCategory.getSelectionModel().getSelectedItem().toString(),
                 TaskPriority.HIGH, taNote.getText(), true, true);
         
         } catch (Exception e) { 

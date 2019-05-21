@@ -104,7 +104,6 @@ public class MMTDAO implements IMMTDAO {
                 dbT.setBeginning(t.getBeginning());
                 dbT.setCategory(t.getCategory());
                 dbT.setEnd(t.getEnd());
-                dbT.setLocation(t.getLocation());
                 dbT.setNote(t.getNote());
                 dbT.setPriority(t.getPriority());
                 dbT.setTitle(t.getTitle());
@@ -237,14 +236,4 @@ public class MMTDAO implements IMMTDAO {
         TypedQuery<Category> jQuery = em.createQuery("select c from Category c ", Category.class);
         return jQuery.getResultList();
     }
-
-    public List<Category> getAllCategories() {
-         EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Category> jQuery = em.createQuery("select c from Category c ", Category.class);
-        return jQuery.getResultList();
-    }
-    
-    
-    
-
 }

@@ -6,13 +6,11 @@
 
 package at.htlstp.syp.mmtasking.model;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 /**
@@ -21,7 +19,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "category")
-public class Category implements Comparable<Category> {
+public class Category implements Serializable, Comparable<Category> {
     
     @Id
     @Column(name = "cat_id")
@@ -29,8 +27,11 @@ public class Category implements Comparable<Category> {
     private Integer id;
     
     @Column(name = "cat_bez")
-    private final String name;
+    private String name;
     
+    public Category() {
+        
+    }
     
     public Category(String name) {
         this.name = name;

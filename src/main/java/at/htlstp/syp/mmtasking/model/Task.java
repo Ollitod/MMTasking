@@ -5,6 +5,7 @@
  */
 package at.htlstp.syp.mmtasking.model;
 
+import at.htlstp.syp.mmtasking.db.LocalDateTimeAttributeConverter;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -48,9 +49,6 @@ public class Task implements Serializable {
     @Column(name = "task_weekday")
     private Integer weekday;
 
-    @Embedded
-    private Location location; // contains Fahrzeit
-
     @Column(name = "task_category")
     private String category;
 
@@ -73,12 +71,11 @@ public class Task implements Serializable {
 
     }
 
-    public Task(String title, LocalDateTime beginning, LocalDateTime end, Location location, String category, TaskPriority priority, String note, boolean deletable, boolean finalized) {
+    public Task(String title, LocalDateTime beginning, LocalDateTime end, String category, TaskPriority priority, String note, boolean deletable, boolean finalized) {
         this.title = title;
         this.beginning = beginning;
         this.end = end;
 //        this.weekday = beginning.getDayOfWeek().getValue();
-        this.location = location;
         this.category = category;
         this.priority = priority;
         this.note = note;
@@ -125,14 +122,6 @@ public class Task implements Serializable {
 
     private void setWeekday(Integer weekday) {
         this.weekday = weekday;
-    }
-
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
     }
 
     public String getCategory() {

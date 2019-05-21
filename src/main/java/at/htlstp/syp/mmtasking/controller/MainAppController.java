@@ -140,17 +140,17 @@ public class MainAppController implements Initializable {
     @FXML
     private ChoiceBox<Location> cbLocs;
     
-    MMTDAO dao = new MMTDAO();
-    @FXML
-    private MenuItem menuTask;
-    @FXML
-    private MenuItem menuApp;
-    @FXML
-    private ChoiceBox<Location> chbPrefLoc;
-    @FXML
-    private ChoiceBox<Category> cbCategory;
-    @FXML
-    private ChoiceBox<Location> cbLocs;
+//    MMTDAO dao = new MMTDAO();
+//    @FXML
+//    private MenuItem menuTask;
+//    @FXML
+//    private MenuItem menuApp;
+//    @FXML
+//    private ChoiceBox<Location> chbPrefLoc;
+//    @FXML
+//    private ChoiceBox<Category> cbCategory;
+//    @FXML
+//    private ChoiceBox<Location> cbLocs;
     
 
     /**
@@ -167,7 +167,7 @@ public class MainAppController implements Initializable {
 
         initFinalizing();
         
-        setUpEnv();
+//        setUpEnv();
         
         btnFinalize.setOnAction((ActionEvent e) -> {
             Task t = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
@@ -222,19 +222,20 @@ public class MainAppController implements Initializable {
         setUpTaskM();
 
         lvTerminM.setItems(appointments);
+        System.out.println(dao.getAllCategories());
     }
 
     private void initFinalizing() {
         List<Task> taskliste = new ArrayList<>();
-        taskliste.add(new Task("Task 1", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, new Category("Fixen"), TaskPriority.MEDIUM, "Commentar 1", false, false));
-        taskliste.add(new Task("Task 2", LocalDateTime.now(), LocalDateTime.now().plusDays(4), null, new Category("Priorisieren"), TaskPriority.LOW, "Commentar 2", false, false));
-        taskliste.add(new Task("Task 3", LocalDateTime.now(), LocalDateTime.now().plusDays(3), null, new Category("Aufsetzen"), TaskPriority.HIGH, "Commentar 3", true, false));
-        taskliste.add(new Task("Task 4", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, new Category("Fixen"), TaskPriority.MEDIUM, "Commentar 1", false, false));
-        taskliste.add(new Task("Task 5", LocalDateTime.now(), LocalDateTime.now().plusDays(4), null, new Category("Priorisieren"), TaskPriority.LOW, "Commentar 2", false, false));
-        taskliste.add(new Task("Task 6", LocalDateTime.now(), LocalDateTime.now().plusDays(3), null, new Category("Aufsetzen"), TaskPriority.HIGH, "Commentar 3", true, false));
-        taskliste.add(new Task("Task 7", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, new Category("Fixen"), TaskPriority.MEDIUM, "Commentar 1", false, false));
-        taskliste.add(new Task("Task 8", LocalDateTime.now(), LocalDateTime.now().plusDays(4), null, new Category("Priorisieren"), TaskPriority.LOW, "Commentar 2", false, false));
-        taskliste.add(new Task("Task 9", LocalDateTime.now(), LocalDateTime.now().plusDays(3), null, new Category("Aufsetzen"), TaskPriority.HIGH, "Commentar 3", true, false));
+        taskliste.add(new Task("Task 1", LocalDateTime.now(), LocalDateTime.now().plusDays(5), "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
+        taskliste.add(new Task("Task 2", LocalDateTime.now(), LocalDateTime.now().plusDays(4), "Priorisieren", TaskPriority.LOW, "Commentar 2", false, false));
+        taskliste.add(new Task("Task 3", LocalDateTime.now(), LocalDateTime.now().plusDays(3), "Aufsetzen", TaskPriority.HIGH, "Commentar 3", true, false));
+        taskliste.add(new Task("Task 4", LocalDateTime.now(), LocalDateTime.now().plusDays(5), "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
+        taskliste.add(new Task("Task 5", LocalDateTime.now(), LocalDateTime.now().plusDays(4), "Priorisieren", TaskPriority.LOW, "Commentar 2", false, false));
+        taskliste.add(new Task("Task 6", LocalDateTime.now(), LocalDateTime.now().plusDays(3), "Aufsetzen", TaskPriority.HIGH, "Commentar 3", true, false));
+        taskliste.add(new Task("Task 7", LocalDateTime.now(), LocalDateTime.now().plusDays(5), "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
+        taskliste.add(new Task("Task 8", LocalDateTime.now(), LocalDateTime.now().plusDays(4), "Priorisieren", TaskPriority.LOW, "Commentar 2", false, false));
+        taskliste.add(new Task("Task 9", LocalDateTime.now(), LocalDateTime.now().plusDays(3), "Aufsetzen", TaskPriority.HIGH, "Commentar 3", true, false));
         taskliste = taskliste.stream()
                 .filter(t -> !t.isFinalized())
                 .collect(Collectors.toList());
@@ -279,9 +280,9 @@ public class MainAppController implements Initializable {
 
     private void setUpTaskM() {
         List<Task> taskliste = new ArrayList<>();
-        taskliste.add(new Task("Task 1", LocalDateTime.now(), LocalDateTime.now().plusDays(5), null, new Category("Fixen"), TaskPriority.MEDIUM, "Commentar 1", false, false));
-        taskliste.add(new Task("Task 2", LocalDateTime.now(), LocalDateTime.now().plusDays(4), null, new Category("Priorisieren"), TaskPriority.LOW, "Commentar 2", false, false));
-        taskliste.add(new Task("Task 3", LocalDateTime.now(), LocalDateTime.now().plusDays(3), null, new Category("Aufsetzen"), TaskPriority.HIGH, "Commentar 3", true, false));
+        taskliste.add(new Task("Task 1", LocalDateTime.now(), LocalDateTime.now().plusDays(5), "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
+        taskliste.add(new Task("Task 2", LocalDateTime.now(), LocalDateTime.now().plusDays(4), "Priorisieren", TaskPriority.LOW, "Commentar 2", false, false));
+        taskliste.add(new Task("Task 3", LocalDateTime.now(), LocalDateTime.now().plusDays(3), "Aufsetzen", TaskPriority.HIGH, "Commentar 3", true, false));
 
         cbHoch.setOnMouseClicked((event) -> {
                     changePriority(TaskPriority.HIGH);
@@ -321,9 +322,6 @@ public class MainAppController implements Initializable {
         cbNiedrig.setSelected(false);
         
         //Notifier.INSTANCE.notifyInfo("Info", "This is an info");
-
-    private void changePriority(TaskPriority priority) {
-
 //        for (JFXCheckBox cb : checkboxes) {
 //            cb.setSelected(false);
 //            if (cb.equals(trigger)) {

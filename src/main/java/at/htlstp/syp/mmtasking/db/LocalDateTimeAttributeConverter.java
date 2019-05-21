@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package at.htlstp.syp.mmtasking.model;
+package at.htlstp.syp.mmtasking.db;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
