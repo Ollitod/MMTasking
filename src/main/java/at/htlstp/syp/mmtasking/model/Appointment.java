@@ -21,10 +21,12 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "appointment")
+@SequenceGenerator(name = "appointment_seq", sequenceName = "appointment_id_seq")
 public class Appointment implements Serializable {
 
     @Id
     @Column(name = "app_id")
+    @GeneratedValue(generator = "appointment_seq")
     private Integer id;
     private String title;
     private Location location;

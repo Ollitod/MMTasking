@@ -6,7 +6,6 @@
 package at.htlstp.syp.mmtasking;
 
 import at.htlstp.syp.mmtasking.controller.MainAppController;
-import at.htlstp.syp.mmtasking.db.JPAUtil;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
@@ -51,7 +50,6 @@ public class MainApp extends Application {
         super.stop();
         controller.getClock().stop();
         controller.getDate().stop();
-        JPAUtil.close();
 //        controller.getAutologout().stop();
     }
 }

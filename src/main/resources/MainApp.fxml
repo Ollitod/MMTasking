@@ -27,7 +27,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="600.0" prefWidth="908.0" xmlns="http://javafx.com/javafx/8.0.131" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.htlstp.syp.mmtasking.controller.MainAppController">
+<VBox prefHeight="600.0" prefWidth="908.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.htlstp.syp.mmtasking.controller.MainAppController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>

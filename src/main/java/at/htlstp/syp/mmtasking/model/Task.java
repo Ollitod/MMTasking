@@ -27,10 +27,12 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "task")
+@SequenceGenerator(name = "task_seq", sequenceName = "task_id_seq")
 public class Task implements Serializable {
 
     @Id
     @Column(name = "task_id")
+    @GeneratedValue(generator = "task_seq")
     private Integer id;
 
     @Column(name = "task_title")
@@ -43,6 +45,9 @@ public class Task implements Serializable {
     @Column(name = "task_end")
     @Convert(converter = LocalDateTimeAttributeConverter.class)
     private LocalDateTime end;
+
+    @Column(name = "task_weekday")
+    private Integer weekday;
 
     @Column(name = "task_category")
     private String category;
@@ -70,6 +75,7 @@ public class Task implements Serializable {
         this.title = title;
         this.beginning = beginning;
         this.end = end;
+//        this.weekday = beginning.getDayOfWeek().getValue();
         this.category = category;
         this.priority = priority;
         this.note = note;
@@ -99,6 +105,7 @@ public class Task implements Serializable {
 
     public void setBeginning(LocalDateTime beginning) {
         this.beginning = beginning;
+        setWeekday(beginning.getDayOfWeek().getValue());
     }
 
     public LocalDateTime getEnd() {
@@ -107,6 +114,14 @@ public class Task implements Serializable {
 
     public void setEnd(LocalDateTime end) {
         this.end = end;
+    }
+
+    public Integer getWeekday() {
+        return weekday;
+    }
+
+    private void setWeekday(Integer weekday) {
+        this.weekday = weekday;
     }
 
     public String getCategory() {
