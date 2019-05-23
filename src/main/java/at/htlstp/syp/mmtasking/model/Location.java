@@ -26,7 +26,6 @@ public class Location implements Serializable {
     
     @Id
     @Column(name = "loc_id")
-    @GeneratedValue(generator = "loc_seq")
     private Integer id;
     
     @Column(name = "loc_name")

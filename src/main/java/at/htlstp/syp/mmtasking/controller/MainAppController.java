@@ -89,15 +89,15 @@ public class MainAppController implements Initializable {
     @FXML
     private JFXTextField tfTaskD;
     @FXML
-    private JFXDatePicker dateVon;
+    private JFXDatePicker dateVonD;
     @FXML
-    private JFXTimePicker timeVon;
+    private JFXTimePicker timeVonD;
     @FXML
-    private JFXDatePicker dateBis;
+    private JFXDatePicker dateBisD;
     @FXML
-    private JFXTimePicker timeBis;
+    private JFXTimePicker timeBisD;
     @FXML
-    private JFXTextArea taComment;
+    private JFXTextArea taCommentD;
     @FXML
     private JFXCheckBox cbHoch;
     @FXML
@@ -105,30 +105,19 @@ public class MainAppController implements Initializable {
     @FXML
     private JFXCheckBox cbNiedrig;
     @FXML
-    private JFXCheckBox cbDeleteable;
+    private JFXCheckBox cbDeleteableD;
     @FXML
     private JFXListView<Task> lvAusstehendeTasks;
     @FXML
     private JFXDatePicker dateVonAnalyse;
     @FXML
     private JFXDatePicker dateBisAnalyse;
-
-    private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("kk:mm:ss");
-    private static final DateTimeFormatter dateFormatterLong = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy");
-    private Timeline clock;
-    private Timeline date;
-    private Timeline autologout;
-    private Instant logoutTime;
     @FXML
     private TabPane tabPane;
-
-    private List<JFXCheckBox> checkboxes;
     @FXML
     private Button btnEdit;
     @FXML
     private Button btnFinalize;
-    
-    MMTDAO dao = new MMTDAO();
     @FXML
     private MenuItem menuTask;
     @FXML
@@ -136,22 +125,18 @@ public class MainAppController implements Initializable {
     @FXML
     private ChoiceBox<Location> chbPrefLoc;
     @FXML
-    private ChoiceBox<Category> cbCategory;
+    private ChoiceBox<Category> cbCategoryD;
     @FXML
     private ChoiceBox<Location> cbLocs;
-    
-//    MMTDAO dao = new MMTDAO();
-//    @FXML
-//    private MenuItem menuTask;
-//    @FXML
-//    private MenuItem menuApp;
-//    @FXML
-//    private ChoiceBox<Location> chbPrefLoc;
-//    @FXML
-//    private ChoiceBox<Category> cbCategory;
-//    @FXML
-//    private ChoiceBox<Location> cbLocs;
-    
+
+    private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("kk:mm:ss");
+    private static final DateTimeFormatter dateFormatterLong = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy");
+    private Timeline clock;
+    private Timeline date;
+    private Timeline autologout;
+    private Instant logoutTime;
+    private List<JFXCheckBox> checkboxes;
+    private MMTDAO dao = MMTDAO.getInstance();
 
     /**
      * Initializes the controller class.
@@ -159,16 +144,15 @@ public class MainAppController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         LocalDateTime current;
-        
+
         lblCurrentUser.setText("Current User: Alexandra Meinhard");
-        
+
         initTimeTimeline();
         initDateTimeline();
 
         initFinalizing();
-        
+
 //        setUpEnv();
-        
         btnFinalize.setOnAction((ActionEvent e) -> {
             Task t = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
             t.finalizeTask();
@@ -180,21 +164,19 @@ public class MainAppController implements Initializable {
             tfTaskD.setText(task.getTitle());
             //cbCategory.getItems().contains(task.getCategory());
             //cbCategory.setSelectionModel();
-            dateVon.setValue(task.getBeginning().toLocalDate());
-            dateBis.setValue(task.getEnd().toLocalDate());
-            timeVon.setValue(task.getBeginning().toLocalTime());
-            timeBis.setValue(task.getEnd().toLocalTime());
+            dateVonD.setValue(task.getBeginning().toLocalDate());
+            dateBisD.setValue(task.getEnd().toLocalDate());
+            timeVonD.setValue(task.getBeginning().toLocalTime());
+            timeBisD.setValue(task.getEnd().toLocalTime());
             changePriority(task.getPriority());
-            cbDeleteable.setSelected(task.isDeletable());
-            taComment.setText(task.getNote());
+            cbDeleteableD.setSelected(task.isDeletable());
+            taCommentD.setText(task.getNote());
 
             tabPane.getSelectionModel().select(1);
         });
-        
+
         setupAnalyse();
-        
-        
-        
+
 //        LocalDateTime future = LocalDateTime.now().plusMinutes(15);
 //        logoutTime = Instant.now();
 //        autologout = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
@@ -219,10 +201,9 @@ public class MainAppController implements Initializable {
 //        autologout.play();
         ObservableList<Appointment> appointments = FXCollections.observableArrayList();
 
-        setUpTaskM();
+        setUpCurrentTasks();
 
         lvTerminM.setItems(appointments);
-        System.out.println(dao.getAllCategories());
     }
 
     private void initFinalizing() {
@@ -277,68 +258,45 @@ public class MainAppController implements Initializable {
 //
 //        tabPane.getSelectionModel().select(1);
 //    }
-
-    private void setUpTaskM() {
-        List<Task> taskliste = new ArrayList<>();
-        taskliste.add(new Task("Task 1", LocalDateTime.now(), LocalDateTime.now().plusDays(5), "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
-        taskliste.add(new Task("Task 2", LocalDateTime.now(), LocalDateTime.now().plusDays(4), "Priorisieren", TaskPriority.LOW, "Commentar 2", false, false));
-        taskliste.add(new Task("Task 3", LocalDateTime.now(), LocalDateTime.now().plusDays(3), "Aufsetzen", TaskPriority.HIGH, "Commentar 3", true, false));
-
-        cbHoch.setOnMouseClicked((event) -> {
-                    changePriority(TaskPriority.HIGH);
-        });
-        
-        cbMittel.setOnMouseClicked((event) -> {
-                    changePriority(TaskPriority.MEDIUM);
-        });
-        
-        cbNiedrig.setOnMouseClicked((event) -> {
-                    changePriority(TaskPriority.LOW);
-        });
-        
-        ObservableList<Task> tasks = FXCollections.observableArrayList(taskliste);
-        lvTaskM.setItems(tasks);
+    private void setUpCurrentTasks() {
+        lvTaskM.getItems().addAll(dao.getAllTasks());
         lvTaskM.getSelectionModel().selectedItemProperty().addListener(listener -> {
             Task task = lvTaskM.getSelectionModel().getSelectedItem();
             
             tfTaskD.setText(task.getTitle());
-            //tfKategorieD.setText(task.getCategory()); //JM: added toString
-            dateVon.setValue(task.getBeginning().toLocalDate());
-            dateBis.setValue(task.getEnd().toLocalDate());
-            timeVon.setValue(task.getBeginning().toLocalTime());
-            timeBis.setValue(task.getEnd().toLocalTime());
+            Category c = Category.getCategory(task.getCategory());
+            cbCategoryD.getSelectionModel().select(c);
+            dateVonD.setValue(task.getBeginning().toLocalDate());
+            dateBisD.setValue(task.getEnd().toLocalDate());
+            timeVonD.setValue(task.getBeginning().toLocalTime());
+            timeBisD.setValue(task.getEnd().toLocalTime());
             changePriority(task.getPriority());
-            cbDeleteable.setSelected(task.isDeletable());
-            taComment.setText(task.getNote());
+            cbDeleteableD.setSelected(task.isDeletable());
+            taCommentD.setText(task.getNote());
 
             tabPane.getSelectionModel().select(1);
         });
+
+        cbHoch.setOnMouseClicked((event) -> {
+            changePriority(TaskPriority.HIGH);
+        });
+
+        cbMittel.setOnMouseClicked((event) -> {
+            changePriority(TaskPriority.MEDIUM);
+        });
+
+        cbNiedrig.setOnMouseClicked((event) -> {
+            changePriority(TaskPriority.LOW);
+        });
+
     }
 
     private void changePriority(TaskPriority priority) {
-        
-        cbHoch.setSelected(false);
-        cbMittel.setSelected(false);
-        cbNiedrig.setSelected(false);
-        
-        //Notifier.INSTANCE.notifyInfo("Info", "This is an info");
-//        for (JFXCheckBox cb : checkboxes) {
-//            cb.setSelected(false);
-//            if (cb.equals(trigger)) {
-//                cb.setSelected(true);
-//            }
-//        }
         cbHoch.setSelected(false);
         cbMittel.setSelected(false);
         cbNiedrig.setSelected(false);
 
         Notifier.INSTANCE.notifyInfo("Info", "This is an info");
-
-//        for (TaskPriority p : priority.values()) {
-//            if (p.equals(priority)) {
-//                
-//            }
-//        }
         switch (priority) {
             case HIGH:
                 cbHoch.setSelected(true);
@@ -363,21 +321,18 @@ public class MainAppController implements Initializable {
     public Timeline getAutologout() {
         return autologout;
     }
-    
-    public void setupCategoryDropdown(){
-        
-        //ObservableList<Category> cat = FXCollections.observableArrayList(dao.getCategoriesforAnalyse());
-        //cbKategorie.setItems(cat);
+
+    public void setupCategoryDropdown() {
+//        ObservableList<Category> cat = FXCollections.observableArrayList(dao.getCategoriesforAnalyse());
+//        cbKategorie.setItems(cat);
     }
-    
-    public void setupLocationDropdown(){
-        
-        //ObservableList<Location> cat = FXCollections.observableArrayList(dao.getLocationsforAnalyse());
-        //cbOrt.setItems(cat);
+
+    public void setupLocationDropdown() {
+        ObservableList<Location> cat = FXCollections.observableArrayList(dao.getLocationsforAnalyse());
+        cbOrt.setItems(cat);
     }
-    
-    public void setupPriorityDropdown(){
-        
+
+    public void setupPriorityDropdown() {
         ObservableList<TaskPriority> cat = FXCollections.observableArrayList();
         cat.add(TaskPriority.HIGH);
         cat.add(TaskPriority.MEDIUM);
@@ -393,66 +348,48 @@ public class MainAppController implements Initializable {
 
     @FXML
     private void openTaskDialog(ActionEvent event) {
-        
-                Stage stage = new Stage();
-                Parent root = null;
-                try {
-                    root = FXMLLoader.load(getClass().getResource("/AddTask.fxml"));
-                } catch (IOException ex) {
-                    System.err.println("Task Dialog fail");
-                    //Logger.getLogger(this.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                
-                Scene scene = new Scene(root);
-                stage.setScene(scene);
-                stage.show();    
+        Stage stage = new Stage();
+        Parent root = null;
+        try {
+            root = FXMLLoader.load(getClass().getResource("/AddTask.fxml"));
+        } catch (IOException ex) {
+            System.err.println("Task Dialog fail");
+            //Logger.getLogger(this.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
     }
 
     @FXML
     private void openAppDialog(ActionEvent event) {
-         Stage stage = new Stage();
-                Parent root = null;
-                try {
-                    root = FXMLLoader.load(getClass().getResource("/AddApp.fxml"));
-                } catch (IOException ex) {
-                    System.err.println("Appointment Dialog fail");
-                    //Logger.getLogger(this.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                
-                Scene scene = new Scene(root);
-                stage.setScene(scene);
-                stage.show(); 
+        Stage stage = new Stage();
+        Parent root = null;
+        try {
+            root = FXMLLoader.load(getClass().getResource("/AddApp.fxml"));
+        } catch (IOException ex) {
+            System.err.println("Appointment Dialog fail");
+            //Logger.getLogger(this.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
 
     }
-    
-        private void setUpEnv() {
 
-        ObservableList<Location> locs = FXCollections.observableArrayList();
-        //locs.addAll(dao.getAllLocation());
-        locs.add(new Location("Irnfritz"));
-        cbLocs.setItems(locs);
-        
-        ObservableList<Category> cat = FXCollections.observableArrayList();
-        //locs.addAll(dao.getAllCategories());
-        cat.add(new Category("Test"));
-        cbCategory.setItems(cat);
-        
-        
-
+    private void setUpEnv() {
+        cbLocs.getItems().addAll(dao.getAllLocations());
+        cbCategoryD.getItems().addAll(dao.getAllCategories());
     }
 
     @FXML
     private void helpClicked(ActionEvent event) {
-        
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setContentText("MMT Solutions - NO RIGHTS RESERVED");
         alert.setTitle("Help");
         alert.show();
-        
-        
+
     }
-            
-      
-    
-    
 }

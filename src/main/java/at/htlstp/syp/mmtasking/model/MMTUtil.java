@@ -6,6 +6,7 @@
 
 package at.htlstp.syp.mmtasking.model;
 
+import at.htlstp.syp.mmtasking.db.JPAUtil;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -13,7 +14,7 @@ import java.time.format.DateTimeFormatter;
  *
  * @author Oliver Tod / 4BHIF
  */
-public class MMTUtil {
+public class MMTUtil implements AutoCloseable {
     
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
@@ -40,6 +41,9 @@ public class MMTUtil {
     public static DateTimeFormatter getDTF() {
         return FORMATTER;
     }
-    
-    
+
+    @Override
+    public void close() throws Exception {
+        JPAUtil.close();
+    }
 }

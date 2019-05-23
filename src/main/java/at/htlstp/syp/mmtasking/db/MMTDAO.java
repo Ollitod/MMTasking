@@ -21,6 +21,19 @@ import javax.persistence.TypedQuery;
  * @author 20150202
  */
 public class MMTDAO implements IMMTDAO {
+    
+    private static MMTDAO instance;
+    
+    private MMTDAO() {
+        
+    }
+    
+    public static MMTDAO getInstance() {
+        if (instance == null) {
+            instance = new MMTDAO();
+        }
+        return instance;
+    }
 
     @Override
     public List<Task> getAllTasks() {
@@ -29,7 +42,7 @@ public class MMTDAO implements IMMTDAO {
         return jQuery.getResultList();
     }
     
-    public List<Location> getAllLocation() {
+    public List<Location> getAllLocations() {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         TypedQuery<Location> jQuery = em.createQuery("select l from Location l ", Location.class);
         return jQuery.getResultList();
@@ -216,8 +229,6 @@ public class MMTDAO implements IMMTDAO {
     }
     
     public List<Category> getCategoriesforAnalyse(){
-        List<Category> categories = new ArrayList<>();
-
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         TypedQuery<Category> jQuery = em.createQuery("select c from Category c", Category.class);
         return jQuery.getResultList();  
@@ -233,7 +244,7 @@ public class MMTDAO implements IMMTDAO {
 
     public List<Category> getAllCategories() {
          EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Category> jQuery = em.createQuery("select c from Category c ", Category.class);
+        TypedQuery<Category> jQuery = em.createQuery("select c from Category c", Category.class);
         return jQuery.getResultList();
     }
 }
