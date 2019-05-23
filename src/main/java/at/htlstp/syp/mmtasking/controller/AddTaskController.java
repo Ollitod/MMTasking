@@ -72,7 +72,7 @@ public class AddTaskController implements Initializable {
     @FXML
     private ChoiceBox<Category> cbCategory;
 
-    MMTDAO dao = new MMTDAO();
+    private MMTDAO dao = MMTDAO.getInstance();
 
     /**
      * Initializes the controller class.
@@ -113,7 +113,7 @@ public class AddTaskController implements Initializable {
     private void setUpEnv() {
 
         ObservableList<Location> locs = FXCollections.observableArrayList();
-        //locs.addAll(dao.getAllLocation());
+        //locs.addAll(dao.getAllLocations());
         locs.add(new Location("Irnfritz"));
         cbLocs.setItems(locs);
         

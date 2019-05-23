@@ -45,7 +45,7 @@ public class AddAppController implements Initializable {
     @FXML
     private JFXButton addApp;
 
-    MMTDAO dao = new MMTDAO();
+    private MMTDAO dao = MMTDAO.getInstance();
     @FXML
     private JFXTextArea note;
     @FXML
@@ -82,7 +82,7 @@ public class AddAppController implements Initializable {
     private void fillLocs() {
 
         ObservableList<Location> locs = FXCollections.observableArrayList();
-        //locs.addAll(dao.getAllLocation());
+        //locs.addAll(dao.getAllLocations());
         locs.add(new Location("Irnfritz"));
         cb_Loc.setItems(locs);
     }

@@ -6,6 +6,7 @@
 
 package at.htlstp.syp.mmtasking.model;
 
+import at.htlstp.syp.mmtasking.db.JPAUtil;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -40,6 +41,4 @@ public class MMTUtil {
     public static DateTimeFormatter getDTF() {
         return FORMATTER;
     }
-    
-    
 }
