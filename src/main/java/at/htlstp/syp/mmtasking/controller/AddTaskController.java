@@ -5,7 +5,6 @@ package at.htlstp.syp.mmtasking.controller;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 import at.htlstp.syp.mmtasking.db.MMTDAO;
 import at.htlstp.syp.mmtasking.db.MMTDBException;
 import at.htlstp.syp.mmtasking.model.Appointment;
@@ -79,59 +78,57 @@ public class AddTaskController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-            setUpEnv();
-            //handlePrio();
-        }    
+        setUpEnv();
+        taskName.requestFocus();
+    }
 
     @FXML
     private void doAddTask(ActionEvent event) {
-        
+
         Task t = null;
-        
+
         try {
             LocalDateTime von = LocalDateTime.of(dateBegin.getValue(), timeBegin.getValue());
             LocalDateTime bis = LocalDateTime.of(dateEnd.getValue(), timeEnd.getValue());
             t = new Task(taskName.getText(), von, bis, cbCategory.getSelectionModel().getSelectedItem().toString(),
-                TaskPriority.HIGH, taNote.getText(), true, true);
-        
-        } catch (Exception e) { 
-               Alert a = new Alert(Alert.AlertType.ERROR);
-               a.setTitle("Error");
-               a.setContentText("Überprüfen Sie bitte Ihre Eingaben");
-               a.show();
+                    TaskPriority.HIGH, taNote.getText(), true, true);
+
+        } catch (Exception e) {
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setTitle("Error");
+            a.setContentText("Überprüfen Sie bitte Ihre Eingaben");
+            a.show();
         }
-        
-        
+
         try {
+            int lastID = dao.getAllTasks()
+                    .stream()
+                    .mapToInt(task -> task.getId())
+                    .max()
+                    .getAsInt();
+            t.setId(lastID + 1);
             dao.insertTask(t);
         } catch (MMTDBException ex) {
             Logger.getLogger(AddAppController.class.getName()).log(Level.SEVERE, null, ex);
-        }  
-       
+        }
+
     }
 
     private void setUpEnv() {
 
-        ObservableList<Location> locs = FXCollections.observableArrayList();
-        //locs.addAll(dao.getAllLocations());
-        locs.add(new Location("Irnfritz"));
-        cbLocs.setItems(locs);
-        
-        ObservableList<Category> cat = FXCollections.observableArrayList();
-        //locs.addAll(dao.getAllCategories());
-        cat.add(new Category("Test"));
-        cbCategory.setItems(cat);
-        
+        cbLocs.getItems().addAll(dao.getAllLocations());
+
+        cbCategory.getItems().addAll(dao.getAllCategories());
+
         cbHoch.setOnMouseClicked((event) -> {
             handlePrio(TaskPriority.HIGH);
         });
-         cbMittel.setOnMouseClicked((event) -> {
+        cbMittel.setOnMouseClicked((event) -> {
             handlePrio(TaskPriority.MEDIUM);
         });
-          cbNiedrig.setOnMouseClicked((event) -> {
+        cbNiedrig.setOnMouseClicked((event) -> {
             handlePrio(TaskPriority.LOW);
         });
-        
 
     }
 
@@ -139,7 +136,6 @@ public class AddTaskController implements Initializable {
         cbHoch.setSelected(false);
         cbMittel.setSelected(false);
         cbNiedrig.setSelected(false);
-
 
         switch (priority) {
             case HIGH:
@@ -154,5 +150,5 @@ public class AddTaskController implements Initializable {
         }
 
     }
-    
+
 }
