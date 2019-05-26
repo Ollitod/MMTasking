@@ -6,12 +6,9 @@
 
 package at.htlstp.syp.mmtasking.model;
 
-import at.htlstp.syp.mmtasking.controller.MainAppController;
 import at.htlstp.syp.mmtasking.db.MMTDAO;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -23,73 +20,73 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "category")
-public class Category implements Serializable, Comparable<Category> {
+public class Category implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     
     @Id
+    @Basic(optional = false)
     @Column(name = "cat_id")
-    private Integer id;
+    private Short catId;
     
     @Column(name = "cat_bez")
-    private String name;
-    
-    
-    public Category() {   
-    }
-    
-    public Category(String name) {
-        // Abfrage auf letze ID
-        this.name = name;
-    }
-    
-    public Category(Integer id, String name) {
-        this.id = id;
-        this.name = name;
+    private String catBez;
+
+    public Category() {
     }
 
-    public String getName() {
-        return name;
+    public Category(Short catId) {
+        this.catId = catId;
+    }
+    
+    public Category(String bezeichnung) {
+        this.catId = 6;
+        this.catBez = bezeichnung;
+    }
+
+    public Short getCatId() {
+        return catId;
+    }
+
+    public void setCatId(Short catId) {
+        this.catId = catId;
+    }
+
+    public String getCatBez() {
+        return catBez;
+    }
+
+    public void setCatBez(String catBez) {
+        this.catBez = catBez;
     }
     
     public static Category getCategory(String category) {
-        return MMTDAO.getInstance().getAllCategories()
-                .stream()
-                .filter(c -> c.getName().equalsIgnoreCase(category))
-                .findFirst()
-                .get();
+        MMTDAO dao = MMTDAO.getInstance();
+        return MMTDAO.getInstance().findCategoryByName(category);
     }
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 41 * hash + Objects.hashCode(this.name);
+        int hash = 0;
+        hash += (catId != null ? catId.hashCode() : 0);
         return hash;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof Category)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Category other = (Category) obj;
-        if (!Objects.equals(this.name, other.name)) {
+        Category other = (Category) object;
+        if ((this.catId == null && other.catId != null) || (this.catId != null && !this.catId.equals(other.catId))) {
             return false;
         }
         return true;
     }
 
     @Override
-    public int compareTo(Category o) {
-        return this.name.compareTo(o.name);
-    }
-
-    @Override
     public String toString() {
-        return name;
+        return catBez;
     }
 }

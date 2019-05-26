@@ -127,7 +127,7 @@
                            </font>
                         </Label>
                         <JFXTextField fx:id="tfTaskD" layoutX="32.0" layoutY="92.0" prefHeight="27.0" prefWidth="271.0" promptText="task " />
-                        <JFXDatePicker fx:id="dateVon" defaultColor="BLACK" layoutX="101.0" layoutY="149.0" prefHeight="29.0" prefWidth="172.0" promptText="begin" />
+                        <JFXDatePicker fx:id="dateVonD" defaultColor="BLACK" layoutX="101.0" layoutY="149.0" prefHeight="29.0" prefWidth="172.0" promptText="begin" />
                         <Label layoutX="46.0" layoutY="153.0" text="Beginn">
                            <font>
                               <Font size="15.0" />
@@ -138,8 +138,8 @@
                               <Font size="15.0" />
                            </font>
                         </Label>
-                        <JFXTimePicker fx:id="timeVon" defaultColor="BLACK" layoutX="378.0" layoutY="149.0" prefHeight="29.0" prefWidth="176.0" promptText="time" />
-                        <JFXDatePicker fx:id="dateBis" defaultColor="BLACK" layoutX="101.0" layoutY="189.0" prefHeight="29.0" prefWidth="172.0" promptText="ende" />
+                        <JFXTimePicker fx:id="timeVonD" defaultColor="BLACK" layoutX="378.0" layoutY="149.0" prefHeight="29.0" prefWidth="176.0" promptText="time" />
+                        <JFXDatePicker fx:id="dateBisD" defaultColor="BLACK" layoutX="101.0" layoutY="189.0" prefHeight="29.0" prefWidth="172.0" promptText="ende" />
                         <Label layoutX="48.0" layoutY="192.0" text="Ende">
                            <font>
                               <Font size="15.0" />
@@ -150,13 +150,13 @@
                               <Font size="15.0" />
                            </font>
                         </Label>
-                        <JFXTimePicker fx:id="timeBis" defaultColor="BLACK" layoutX="378.0" layoutY="189.0" prefHeight="29.0" prefWidth="176.0" promptText="time" />
+                        <JFXTimePicker fx:id="timeBisD" defaultColor="BLACK" layoutX="378.0" layoutY="189.0" prefHeight="29.0" prefWidth="176.0" promptText="time" />
                         <Label layoutX="46.0" layoutY="232.0" text="Ort">
                            <font>
                               <Font size="15.0" />
                            </font>
                         </Label>
-                        <JFXTextArea fx:id="taComment" layoutX="297.0" layoutY="307.0" prefHeight="142.0" prefWidth="324.0" promptText="comment" />
+                        <JFXTextArea fx:id="taCommentD" layoutX="297.0" layoutY="307.0" prefHeight="142.0" prefWidth="324.0" promptText="comment" />
                         <Label fx:id="lblFahrzeit" layoutX="344.0" layoutY="232.0" prefHeight="19.0" prefWidth="230.0" text="Die Fahrzeit beträgt: xxhxxm">
                            <font>
                               <Font size="15.0" />
@@ -181,10 +181,10 @@
                            </font>
                         </Label>
                         <Separator layoutX="46.0" layoutY="301.0" prefHeight="0.0" prefWidth="571.0" />
-                        <JFXCheckBox fx:id="cbDeleteable" checkedColor="BLACK" layoutX="48.0" layoutY="416.0" text="Löschbar" unCheckedColor="BLACK" />
+                        <JFXCheckBox fx:id="cbDeleteableD" checkedColor="BLACK" layoutX="48.0" layoutY="416.0" text="Löschbar" unCheckedColor="BLACK" />
                         <Separator layoutX="30.0" layoutY="83.0" prefHeight="0.0" prefWidth="587.0" />
                         <Button layoutX="44.0" layoutY="465.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="579.0" text="Übernehmen" />
-                        <ChoiceBox fx:id="cbCategory" layoutX="357.0" layoutY="92.0" prefHeight="27.0" prefWidth="195.0" />
+                        <ChoiceBox fx:id="cbCategoryD" layoutX="357.0" layoutY="92.0" prefHeight="27.0" prefWidth="195.0" />
                         <ChoiceBox fx:id="cbLocs" layoutX="97.0" layoutY="228.0" prefHeight="27.0" prefWidth="167.0" />
                      </children></AnchorPane>
             </content>

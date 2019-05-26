@@ -21,13 +21,13 @@ import javax.persistence.TypedQuery;
  * @author 20150202
  */
 public class MMTDAO implements IMMTDAO {
-    
+
     private static MMTDAO instance;
-    
+
     private MMTDAO() {
-        
+
     }
-    
+
     public static MMTDAO getInstance() {
         if (instance == null) {
             instance = new MMTDAO();
@@ -41,7 +41,7 @@ public class MMTDAO implements IMMTDAO {
         TypedQuery<Task> jQuery = em.createQuery("select t from Task t", Task.class);
         return jQuery.getResultList();
     }
-    
+
     public List<Location> getAllLocations() {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         TypedQuery<Location> jQuery = em.createQuery("select l from Location l ", Location.class);
@@ -227,24 +227,39 @@ public class MMTDAO implements IMMTDAO {
             em.close();
         }
     }
-    
-    public List<Category> getCategoriesforAnalyse(){
+
+    public List<Category> getCategoriesforAnalyse() {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         TypedQuery<Category> jQuery = em.createQuery("select c from Category c", Category.class);
-        return jQuery.getResultList();  
+        return jQuery.getResultList();
     }
-    
-    public List<Location> getLocationsforAnalyse(){
+
+    public List<Location> getLocationsforAnalyse() {
         List<Location> locations = new ArrayList<>();
 
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         TypedQuery<Location> jQuery = em.createQuery("select l from Location l", Location.class);
-        return jQuery.getResultList();  
+        return jQuery.getResultList();
     }
 
     public List<Category> getAllCategories() {
-         EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Category> jQuery = em.createQuery("select c from Category c ", Category.class);
-        return jQuery.getResultList();
+        EntityManager em = JPAUtil.getEMF().createEntityManager();
+        try {
+            TypedQuery<Category> jQuery = em.createQuery("select c from Category c", Category.class);
+            return jQuery.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+    
+    public Category findCategoryByName(String bezeichnung) {
+        EntityManager em = JPAUtil.getEMF().createEntityManager();
+        try {
+            TypedQuery<Category> jQuery = em.createQuery("select c from Category c where c.catBez = :bez", Category.class);
+            jQuery.setParameter("bez", bezeichnung);
+            return jQuery.getSingleResult();
+        } finally {
+            em.close();
+        }
     }
 }

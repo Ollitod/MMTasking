@@ -137,6 +137,9 @@ public class MainAppController implements Initializable {
     private Instant logoutTime;
     private List<JFXCheckBox> checkboxes;
     private MMTDAO dao = MMTDAO.getInstance();
+    
+    private ObservableList<Category> categories;
+    private ObservableList<Location> locations;
 
     /**
      * Initializes the controller class.
@@ -152,7 +155,7 @@ public class MainAppController implements Initializable {
 
         initFinalizing();
 
-//        setUpEnv();
+        setUpEnv();
         btnFinalize.setOnAction((ActionEvent e) -> {
             Task t = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
             t.finalizeTask();
@@ -204,6 +207,8 @@ public class MainAppController implements Initializable {
         setUpCurrentTasks();
 
         lvTerminM.setItems(appointments);
+        
+        System.out.println(dao.getAllCategories());
     }
 
     private void initFinalizing() {
@@ -323,13 +328,11 @@ public class MainAppController implements Initializable {
     }
 
     public void setupCategoryDropdown() {
-//        ObservableList<Category> cat = FXCollections.observableArrayList(dao.getCategoriesforAnalyse());
-//        cbKategorie.setItems(cat);
+        cbKategorie.getItems().addAll(dao.getCategoriesforAnalyse());
     }
 
     public void setupLocationDropdown() {
-        ObservableList<Location> cat = FXCollections.observableArrayList(dao.getLocationsforAnalyse());
-        cbOrt.setItems(cat);
+        cbOrt.getItems().addAll(dao.getLocationsforAnalyse());
     }
 
     public void setupPriorityDropdown() {
@@ -380,6 +383,8 @@ public class MainAppController implements Initializable {
     }
 
     private void setUpEnv() {
+//        categories = FXCollections.observableArrayList(dao.getAllCategories());
+//        locations = FXCollections.observableArrayList(dao.getAllLocations());
         cbLocs.getItems().addAll(dao.getAllLocations());
         cbCategoryD.getItems().addAll(dao.getAllCategories());
     }
