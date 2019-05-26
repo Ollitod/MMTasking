@@ -9,6 +9,7 @@ import at.htlstp.syp.mmtasking.db.LocalDateTimeAttributeConverter;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -82,6 +83,7 @@ public class Task implements Serializable {
         this.note = note;
         this.deletable = deletable;
         this.finalized = finalized;
+        this.time = ChronoUnit.MINUTES.between(beginning, end);
     }
 
     public Integer getId() {
@@ -106,6 +108,7 @@ public class Task implements Serializable {
 
     public void setBeginning(LocalDateTime beginning) {
         this.beginning = beginning;
+        updateTime();
     }
 
     public LocalDateTime getEnd() {
@@ -114,6 +117,7 @@ public class Task implements Serializable {
 
     public void setEnd(LocalDateTime end) {
         this.end = end;
+        updateTime();
     }
 
     public String getCategory() {
@@ -158,6 +162,10 @@ public class Task implements Serializable {
     
     public long getTime() {
         return time;
+    }
+    
+    private void updateTime() {
+        this.time = ChronoUnit.MINUTES.between(beginning, end);
     }
 
     @Override
