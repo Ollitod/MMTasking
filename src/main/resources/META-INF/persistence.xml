@@ -7,6 +7,7 @@
     <class>at.htlstp.syp.mmtasking.model.Location</class>
     <class>at.htlstp.syp.mmtasking.model.Task</class>
     <class>at.htlstp.syp.mmtasking.db.LocalDateTimeAttributeConverter</class>
+    <class>at.htlstp.syp.mmtasking.model.Fahrt</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:ucanaccess://H:\4BHIF\POS\MMTasking\src\main\resources\MMTasking.accdb"/>
       <property name="javax.persistence.jdbc.user" value=""/>

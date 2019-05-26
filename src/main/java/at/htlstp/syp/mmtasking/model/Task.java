@@ -12,13 +12,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Convert;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -43,6 +42,10 @@ public class Task implements Serializable {
     @Column(name = "task_end")
     @Convert(converter = LocalDateTimeAttributeConverter.class)
     private LocalDateTime end;
+    
+    @ManyToOne
+    @JoinColumn(name = "task_fahrt_id", nullable = false)
+    private Fahrt fahrt;
 
     @Column(name = "task_category")
     private String category;
@@ -59,6 +62,9 @@ public class Task implements Serializable {
 
     @Column(name = "task_finalized")
     private boolean finalized;
+    
+    @Column(name = "task_time")
+    private long time;
 
     private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
@@ -66,10 +72,11 @@ public class Task implements Serializable {
 
     }
 
-    public Task(String title, LocalDateTime beginning, LocalDateTime end, String category, TaskPriority priority, String note, boolean deletable, boolean finalized) {
+    public Task(String title, LocalDateTime beginning, LocalDateTime end, Fahrt fahrt, String category, TaskPriority priority, String note, boolean deletable, boolean finalized) {
         this.title = title;
         this.beginning = beginning;
         this.end = end;
+        this.fahrt = fahrt;
         this.category = category;
         this.priority = priority;
         this.note = note;
@@ -147,6 +154,10 @@ public class Task implements Serializable {
 
     public void finalizeTask() {
         this.finalized = true;
+    }
+    
+    public long getTime() {
+        return time;
     }
 
     @Override

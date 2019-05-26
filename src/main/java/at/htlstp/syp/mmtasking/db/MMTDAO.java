@@ -7,6 +7,7 @@ package at.htlstp.syp.mmtasking.db;
 
 import at.htlstp.syp.mmtasking.model.Appointment;
 import at.htlstp.syp.mmtasking.model.Category;
+import at.htlstp.syp.mmtasking.model.Fahrt;
 import at.htlstp.syp.mmtasking.model.Location;
 import at.htlstp.syp.mmtasking.model.Task;
 import java.time.LocalDateTime;
@@ -57,7 +58,7 @@ public class MMTDAO implements IMMTDAO {
     }
 
     @Override
-    public List<Task> getTasksByPeriod(LocalDateTime start, LocalDateTime end) throws MMTDBException {
+    public List<Task> getTasksBetween(LocalDateTime start, LocalDateTime end) throws MMTDBException {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         TypedQuery<Task> jQuery = em.createQuery("select t from Task t where t.beginning between :start and :end or t.end between :start and :end", Task.class);
         jQuery.setParameter("start", start);
@@ -257,6 +258,30 @@ public class MMTDAO implements IMMTDAO {
         try {
             TypedQuery<Category> jQuery = em.createQuery("select c from Category c where c.catBez = :bez", Category.class);
             jQuery.setParameter("bez", bezeichnung);
+            return jQuery.getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+    
+    public Fahrt getFahrtNach(Location location) {
+        EntityManager em = JPAUtil.getEMF().createEntityManager();
+        try {
+            TypedQuery<Fahrt> jQuery = em.createQuery("select f from Fahrt f where f.von = :von and f.nach = :nach", Fahrt.class);
+            Location von = this.findLocationByName("Irnfritz");
+            jQuery.setParameter("von", von);
+            jQuery.setParameter("nach", location);
+            return jQuery.getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+    
+    public Location findLocationByName(String name) {
+        EntityManager em = JPAUtil.getEMF().createEntityManager();
+        try {
+            TypedQuery<Location> jQuery = em.createQuery("select l from Location l where l.name = :name", Location.class);
+            jQuery.setParameter("name", name);
             return jQuery.getSingleResult();
         } finally {
             em.close();

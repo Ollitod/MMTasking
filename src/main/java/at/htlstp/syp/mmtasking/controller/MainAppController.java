@@ -212,20 +212,7 @@ public class MainAppController implements Initializable {
     }
 
     private void initFinalizing() {
-        List<Task> taskliste = new ArrayList<>();
-        taskliste.add(new Task("Task 1", LocalDateTime.now(), LocalDateTime.now().plusDays(5), "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
-        taskliste.add(new Task("Task 2", LocalDateTime.now(), LocalDateTime.now().plusDays(4), "Priorisieren", TaskPriority.LOW, "Commentar 2", false, false));
-        taskliste.add(new Task("Task 3", LocalDateTime.now(), LocalDateTime.now().plusDays(3), "Aufsetzen", TaskPriority.HIGH, "Commentar 3", true, false));
-        taskliste.add(new Task("Task 4", LocalDateTime.now(), LocalDateTime.now().plusDays(5), "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
-        taskliste.add(new Task("Task 5", LocalDateTime.now(), LocalDateTime.now().plusDays(4), "Priorisieren", TaskPriority.LOW, "Commentar 2", false, false));
-        taskliste.add(new Task("Task 6", LocalDateTime.now(), LocalDateTime.now().plusDays(3), "Aufsetzen", TaskPriority.HIGH, "Commentar 3", true, false));
-        taskliste.add(new Task("Task 7", LocalDateTime.now(), LocalDateTime.now().plusDays(5), "Fixen", TaskPriority.MEDIUM, "Commentar 1", false, false));
-        taskliste.add(new Task("Task 8", LocalDateTime.now(), LocalDateTime.now().plusDays(4), "Priorisieren", TaskPriority.LOW, "Commentar 2", false, false));
-        taskliste.add(new Task("Task 9", LocalDateTime.now(), LocalDateTime.now().plusDays(3), "Aufsetzen", TaskPriority.HIGH, "Commentar 3", true, false));
-        taskliste = taskliste.stream()
-                .filter(t -> !t.isFinalized())
-                .collect(Collectors.toList());
-        lvAusstehendeTasks.setItems(FXCollections.observableArrayList(taskliste));
+        lvAusstehendeTasks.getItems().addAll(dao.getAllTasks());
         lvAusstehendeTasks.getSelectionModel().selectFirst();
     }
 

@@ -42,7 +42,7 @@ public interface IMMTDAO {
    * @return Liste der gefilterten Tasks, leere Liste wenn keine Tasks existieren
    * @throws MMTDBException bei einem DB Fehler
    */
-  List<Task> getTasksByPeriod (LocalDateTime start, LocalDateTime end) throws MMTDBException;
+  List<Task> getTasksBetween (LocalDateTime start, LocalDateTime end) throws MMTDBException;
   
   
       /**

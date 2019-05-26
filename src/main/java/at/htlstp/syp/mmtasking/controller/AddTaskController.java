@@ -7,35 +7,30 @@ package at.htlstp.syp.mmtasking.controller;
  */
 import at.htlstp.syp.mmtasking.db.MMTDAO;
 import at.htlstp.syp.mmtasking.db.MMTDBException;
-import at.htlstp.syp.mmtasking.model.Appointment;
-import at.htlstp.syp.mmtasking.model.TaskPriority;
-import static at.htlstp.syp.mmtasking.model.Appointment_.location;
 import at.htlstp.syp.mmtasking.model.Category;
+import at.htlstp.syp.mmtasking.model.Fahrt;
 import at.htlstp.syp.mmtasking.model.Location;
 import at.htlstp.syp.mmtasking.model.Task;
 import at.htlstp.syp.mmtasking.model.TaskPriority;
-import static at.htlstp.syp.mmtasking.model.Task_.category;
-import static at.htlstp.syp.mmtasking.model.Task_.note;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXTimePicker;
-import eu.hansolo.enzo.notification.Notification;
+import eu.hansolo.enzo.notification.Notification.Notifier;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.layout.Priority;
 
 /**
  * FXML Controller class
@@ -79,7 +74,6 @@ public class AddTaskController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         setUpEnv();
-        taskName.requestFocus();
     }
 
     @FXML
@@ -90,14 +84,16 @@ public class AddTaskController implements Initializable {
         try {
             LocalDateTime von = LocalDateTime.of(dateBegin.getValue(), timeBegin.getValue());
             LocalDateTime bis = LocalDateTime.of(dateEnd.getValue(), timeEnd.getValue());
-            t = new Task(taskName.getText(), von, bis, cbCategory.getSelectionModel().getSelectedItem().toString(),
-                    TaskPriority.HIGH, taNote.getText(), true, true);
+            Location location = cbLocs.getSelectionModel().getSelectedItem();
+            Fahrt fahrt = dao.getFahrtNach(location);
+            t = new Task(taskName.getText(), von, bis, fahrt, cbCategory.getSelectionModel().getSelectedItem().toString(),
+                    (cbHoch.isSelected() ? TaskPriority.HIGH : cbMittel.isSelected() ? TaskPriority.MEDIUM : cbNiedrig.isSelected() ? TaskPriority.LOW : TaskPriority.LOW), taNote.getText(), cbDeletable.isSelected(), false);
 
         } catch (Exception e) {
             Alert a = new Alert(Alert.AlertType.ERROR);
             a.setTitle("Error");
-            a.setContentText("Überprüfen Sie bitte Ihre Eingaben");
-            a.show();
+            a.setContentText(e.getMessage());
+            a.showAndWait();
         }
 
         try {
@@ -108,6 +104,11 @@ public class AddTaskController implements Initializable {
                     .getAsInt();
             t.setId(lastID + 1);
             dao.insertTask(t);
+            Alert a = new Alert(Alert.AlertType.INFORMATION);
+            a.setTitle("Erfolgreich");
+            a.setContentText("Der neue Task wurde erfolgreich angelegt!");
+            a.showAndWait();
+            Notifier.INSTANCE.notifyInfo("Task hinzugefügt", "Der neue Task wurde erfolreich angelegt!");
         } catch (MMTDBException ex) {
             Logger.getLogger(AddAppController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -116,8 +117,10 @@ public class AddTaskController implements Initializable {
 
     private void setUpEnv() {
 
-        cbLocs.getItems().addAll(dao.getAllLocations());
+        dateBegin.setValue(LocalDate.now());
+        timeBegin.setValue(LocalTime.now());
 
+        cbLocs.getItems().addAll(dao.getAllLocations());
         cbCategory.getItems().addAll(dao.getAllCategories());
 
         cbHoch.setOnMouseClicked((event) -> {
@@ -129,7 +132,7 @@ public class AddTaskController implements Initializable {
         cbNiedrig.setOnMouseClicked((event) -> {
             handlePrio(TaskPriority.LOW);
         });
-
+        taskName.requestFocus();
     }
 
     private void handlePrio(TaskPriority priority) {
