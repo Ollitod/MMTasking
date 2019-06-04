@@ -340,13 +340,6 @@ public class MainAppController implements Initializable {
         cbPriority.setItems(cat);
     }
 
-    private void setupAnalyse() {
-        cbFilter.getItems().addAll("Category", "Location");
-        cbFilter.getSelectionModel().selectedItemProperty().addListener((Observable observable) -> {
-            analyse();
-        });
-    }
-
     @FXML
     private void openTaskDialog(ActionEvent event) {
         Stage stage = new Stage();
@@ -418,6 +411,23 @@ public class MainAppController implements Initializable {
         lblFahrzeit.textProperty().bind(sb);
     }
 
+    private void setupAnalyse() {
+        cbFilter.getItems().addAll("Category", "Location");
+        cbFilter.getSelectionModel().selectFirst();
+        dateVonAnalyse.setValue(LocalDate.now());
+        dateBisAnalyse.setValue(LocalDate.now());
+        cbFilter.getSelectionModel().selectedItemProperty().addListener((Observable observable) -> {
+            analyse();
+        });
+        dateVonAnalyse.valueProperty().addListener((Observable observable) -> {
+            analyse();
+        });
+        dateBisAnalyse.valueProperty().addListener((Observable observable) -> {
+            analyse();
+        });
+
+    }
+
     private void analyse() {
         barChart.getData().clear();
         LocalDateTime von;
@@ -438,9 +448,9 @@ public class MainAppController implements Initializable {
 
         if (dateBisAnalyse.getValue() == null) {
             bis = LocalDate.now().plusDays(1).atStartOfDay();
-            dateBisAnalyse.setValue(LocalDate.now().plusDays(1));
+            dateBisAnalyse.setValue(LocalDate.now());
         } else {
-            bis = dateBisAnalyse.getValue().atStartOfDay();
+            bis = dateBisAnalyse.getValue().plusDays(1).atStartOfDay();
         }
 
         try {
