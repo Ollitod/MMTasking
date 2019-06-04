@@ -287,4 +287,13 @@ public class MMTDAO implements IMMTDAO {
             em.close();
         }
     }
+    
+//    @Override
+    public List<Task> getTasksByPeriod(LocalDateTime start, LocalDateTime end) throws MMTDBException {
+        EntityManager em = JPAUtil.getEMF().createEntityManager();
+        TypedQuery<Task> jQuery = em.createQuery("select t from Task t where t.beginning between :start and :end or t.end between :start and :end", Task.class);
+        jQuery.setParameter("start", start);
+        jQuery.setParameter("end", end);
+        return jQuery.getResultList();
+    }
 }

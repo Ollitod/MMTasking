@@ -120,6 +120,14 @@ public class Task implements Serializable {
         updateTime();
     }
 
+    public Fahrt getFahrt() {
+        return fahrt;
+    }
+
+    public void setFahrt(Fahrt fahrt) {
+        this.fahrt = fahrt;
+    }
+
     public String getCategory() {
         return category;
     }

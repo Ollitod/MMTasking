@@ -6,8 +6,10 @@
 package at.htlstp.syp.mmtasking.controller;
 
 import at.htlstp.syp.mmtasking.db.MMTDAO;
+import at.htlstp.syp.mmtasking.db.MMTDBException;
 import at.htlstp.syp.mmtasking.model.Appointment;
 import at.htlstp.syp.mmtasking.model.Category;
+import at.htlstp.syp.mmtasking.model.Fahrt;
 import at.htlstp.syp.mmtasking.model.Location;
 import at.htlstp.syp.mmtasking.model.Task;
 import at.htlstp.syp.mmtasking.model.TaskPriority;
@@ -24,9 +26,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,26 +37,27 @@ import java.util.stream.Collectors;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.StringBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Side;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -78,13 +82,8 @@ public class MainAppController implements Initializable {
     private ListView<Appointment> lvTerminM;
     @FXML
     private Label lblFahrzeit;
-    @FXML
     private ChoiceBox<Category> cbKategorie;
-    @FXML
     private ChoiceBox<Location> cbOrt;
-    @FXML
-    private Button btnAuswerten;
-    @FXML
     private ChoiceBox<TaskPriority> cbPriority;
     @FXML
     private JFXTextField tfTaskD;
@@ -137,9 +136,15 @@ public class MainAppController implements Initializable {
     private Instant logoutTime;
     private List<JFXCheckBox> checkboxes;
     private MMTDAO dao = MMTDAO.getInstance();
-    
+
     private ObservableList<Category> categories;
     private ObservableList<Location> locations;
+    @FXML
+    private BarChart<String, Number> barChart;
+    @FXML
+    private ChoiceBox<String> cbFilter;
+    @FXML
+    private PieChart pieChart;
 
     /**
      * Initializes the controller class.
@@ -204,15 +209,18 @@ public class MainAppController implements Initializable {
 //        autologout.play();
         ObservableList<Appointment> appointments = FXCollections.observableArrayList();
 
-        setUpCurrentTasks();
+        setUpDetailView();
 
         lvTerminM.setItems(appointments);
-        
-        System.out.println(dao.getAllCategories());
+        initFahrzeitBinding();
     }
 
     private void initFinalizing() {
-        lvAusstehendeTasks.getItems().addAll(dao.getAllTasks());
+        // Replace with new DAO method!!!
+        lvAusstehendeTasks.getItems().addAll(dao.getAllTasks()
+                .stream()
+                .filter(t -> !t.isFinalized())
+                .collect(Collectors.toList()));
         lvAusstehendeTasks.getSelectionModel().selectFirst();
     }
 
@@ -250,11 +258,11 @@ public class MainAppController implements Initializable {
 //
 //        tabPane.getSelectionModel().select(1);
 //    }
-    private void setUpCurrentTasks() {
+    private void setUpDetailView() {
         lvTaskM.getItems().addAll(dao.getAllTasks());
         lvTaskM.getSelectionModel().selectedItemProperty().addListener(listener -> {
             Task task = lvTaskM.getSelectionModel().getSelectedItem();
-            
+
             tfTaskD.setText(task.getTitle());
             Category c = Category.getCategory(task.getCategory());
             cbCategoryD.getSelectionModel().select(c);
@@ -262,6 +270,8 @@ public class MainAppController implements Initializable {
             dateBisD.setValue(task.getEnd().toLocalDate());
             timeVonD.setValue(task.getBeginning().toLocalTime());
             timeBisD.setValue(task.getEnd().toLocalTime());
+            cbLocs.getSelectionModel().select(task.getFahrt().getNach());
+//            lblFahrzeit.setText("Die Fahrzeit beträgt " + task.getFahrt().getFahrzeit() + " min");
             changePriority(task.getPriority());
             cbDeleteableD.setSelected(task.isDeletable());
             taCommentD.setText(task.getNote());
@@ -331,9 +341,10 @@ public class MainAppController implements Initializable {
     }
 
     private void setupAnalyse() {
-        setupCategoryDropdown();
-        setupLocationDropdown();
-        setupPriorityDropdown();
+        cbFilter.getItems().addAll("Category", "Location");
+        cbFilter.getSelectionModel().selectedItemProperty().addListener((Observable observable) -> {
+            analyse();
+        });
     }
 
     @FXML
@@ -373,7 +384,9 @@ public class MainAppController implements Initializable {
 //        categories = FXCollections.observableArrayList(dao.getAllCategories());
 //        locations = FXCollections.observableArrayList(dao.getAllLocations());
         cbLocs.getItems().addAll(dao.getAllLocations());
+        cbLocs.getSelectionModel().selectFirst();
         cbCategoryD.getItems().addAll(dao.getAllCategories());
+        cbCategoryD.getSelectionModel().selectFirst();
     }
 
     @FXML
@@ -382,6 +395,103 @@ public class MainAppController implements Initializable {
         alert.setContentText("MMT Solutions - NO RIGHTS RESERVED");
         alert.setTitle("Help");
         alert.show();
+
+    }
+
+    @FXML
+    private void handleUebernehmen(ActionEvent event) {
+    }
+
+    private void initFahrzeitBinding() {
+        StringBinding sb = new StringBinding() {
+            {
+                super.bind(cbLocs.getSelectionModel().selectedItemProperty());
+            }
+
+            @Override
+            protected String computeValue() {
+                Location loc = cbLocs.getSelectionModel().getSelectedItem();
+                Fahrt f = dao.getFahrtNach(loc);
+                return "Die Fahrzeit beträgt " + f.getFahrzeit() + " min";
+            }
+        };
+        lblFahrzeit.textProperty().bind(sb);
+    }
+
+    private void analyse() {
+        barChart.getData().clear();
+        LocalDateTime von;
+        LocalDateTime bis;
+        Double zeitInsgesamt = 0.0;
+        List<Task> tasks = null;
+        Map<String, Double> mapTaskTime = new LinkedHashMap<>();;
+        List<PieChart.Data> listPie = new LinkedList<>();        //PieChart
+        List<XYChart.Series> serien = new LinkedList<>();       //BarChart
+        XYChart.Series series;    //BarChart
+
+        if (dateVonAnalyse.getValue() == null) {
+            von = LocalDate.now().atStartOfDay();
+            dateVonAnalyse.setValue(LocalDate.now());
+        } else {
+            von = dateVonAnalyse.getValue().atStartOfDay();
+        }
+
+        if (dateBisAnalyse.getValue() == null) {
+            bis = LocalDate.now().plusDays(1).atStartOfDay();
+            dateBisAnalyse.setValue(LocalDate.now().plusDays(1));
+        } else {
+            bis = dateBisAnalyse.getValue().atStartOfDay();
+        }
+
+        try {
+            tasks = MMTDAO.getInstance().getTasksByPeriod(von, bis);
+        } catch (MMTDBException ex) {
+            Logger.getLogger(MainAppController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if (cbFilter.getSelectionModel().getSelectedItem().equals("Category")) {
+            for (Task task : tasks) {                                                                                       // Map erstellen, von der Kategorie mit der dazugehörigen Zeit
+                if (mapTaskTime.get(task.getCategory()) == null) {
+                    mapTaskTime.put(task.getCategory(), 0.0);
+                }
+                mapTaskTime.put(task.getCategory(), mapTaskTime.get(task.getCategory()) + (task.getTime() / 60));
+                zeitInsgesamt += task.getTime() / 60;
+            }
+
+            for (String cat : mapTaskTime.keySet()) {
+
+                series = new XYChart.Series();
+
+                listPie.add(new PieChart.Data(cat, Math.round(zeitInsgesamt / mapTaskTime.get(cat))));                    //Pie Chart mit Prozent Werten füllen
+                series.getData().add(new XYChart.Data(cat, mapTaskTime.get(cat)));                                        //Bar Chart Serien erstellen 
+                series.setName(cat);
+                serien.add(series);
+            }
+
+        } else {
+            for (Task task : tasks) {                                                                                // Map erstellen, von der Kategorie mit der dazugehörigen Zeit
+                if (!mapTaskTime.containsKey(task.getFahrt().getNach().getName())) {
+                    mapTaskTime.put(task.getFahrt().getNach().getName(), 0.0);
+                }
+                mapTaskTime.put(task.getFahrt().getNach().getName(), mapTaskTime.get(task.getFahrt().getNach().getName()) + task.getTime() / 60.0);
+                zeitInsgesamt += task.getTime() / 60;
+            }
+
+            for (String location : mapTaskTime.keySet()) {
+
+                series = new XYChart.Series();
+                listPie.add(new PieChart.Data(location, Math.round((mapTaskTime.get(location) / zeitInsgesamt) * 100)));     //Pie Chart mit Prozent Werten füllen
+                series.getData().add(new XYChart.Data(location, Math.round(mapTaskTime.get(location))));                      //Bar Chart Serien erstellen 
+                series.setName(location);
+                serien.add(series);
+
+            }
+        }
+
+        ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(listPie);
+        pieChart.setData(pieChartData);
+        pieChart.setLegendSide(Side.BOTTOM);
+        serien.stream().forEach(s -> barChart.getData().addAll(s));
 
     }
 }

@@ -23,6 +23,7 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -83,16 +84,27 @@ public class AddTaskController implements Initializable {
 
         try {
             LocalDateTime von = LocalDateTime.of(dateBegin.getValue(), timeBegin.getValue());
-            LocalDateTime bis = LocalDateTime.of(dateEnd.getValue(), timeEnd.getValue());
+            LocalDateTime nach = LocalDateTime.of(dateEnd.getValue(), timeEnd.getValue());
             Location location = cbLocs.getSelectionModel().getSelectedItem();
             Fahrt fahrt = dao.getFahrtNach(location);
-            t = new Task(taskName.getText(), von, bis, fahrt, cbCategory.getSelectionModel().getSelectedItem().toString(),
-                    (cbHoch.isSelected() ? TaskPriority.HIGH : cbMittel.isSelected() ? TaskPriority.MEDIUM : cbNiedrig.isSelected() ? TaskPriority.LOW : TaskPriority.LOW), taNote.getText(), cbDeletable.isSelected(), false);
-
-        } catch (Exception e) {
+            TaskPriority priority = getSelectedPriority();
+            if (taskName.getText().trim().length() > 50) {
+                throw new IllegalArgumentException("Notiz ist zu lang (max. 250 Zeichen!)");
+            }
+            if (taNote.getText().trim().length() > 255) {
+                throw new IllegalArgumentException("Notiz ist zu lang (max. 250 Zeichen!)");
+            }
+            if (von.isAfter(nach)) {
+                throw new IllegalArgumentException("Startdatum ist nach dem Enddatum!");
+            }
+            
+            t = new Task(taskName.getText().trim(), von, nach, fahrt, cbCategory.getSelectionModel().getSelectedItem().getCatBez(),
+                    priority, taNote.getText().trim(), cbDeletable.isSelected(), false);
+        } catch (Exception ex) {
             Alert a = new Alert(Alert.AlertType.ERROR);
             a.setTitle("Error");
-            a.setContentText(e.getMessage());
+            a.setHeaderText("Invalid parameters");
+            a.setContentText(ex.getMessage());
             a.showAndWait();
         }
 
@@ -152,6 +164,17 @@ public class AddTaskController implements Initializable {
                 break;
         }
 
+    }
+    
+    public TaskPriority getSelectedPriority() {
+        if (cbHoch.isSelected()) {
+            return TaskPriority.HIGH;
+        } else if (cbMittel.isSelected()) {
+            return TaskPriority.MEDIUM;
+        } else if (cbNiedrig.isSelected()) {
+            return TaskPriority.LOW;
+        }
+        return null;
     }
 
 }
