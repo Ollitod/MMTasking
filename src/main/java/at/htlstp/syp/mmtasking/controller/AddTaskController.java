@@ -23,15 +23,14 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
+import javafx.stage.Stage;
 
 /**
  * FXML Controller class
@@ -68,6 +67,8 @@ public class AddTaskController implements Initializable {
     private ChoiceBox<Category> cbCategory;
 
     private MMTDAO dao = MMTDAO.getInstance();
+    private Task task;
+    private Stage stage;
 
     /**
      * Initializes the controller class.
@@ -97,9 +98,29 @@ public class AddTaskController implements Initializable {
             if (von.isAfter(nach)) {
                 throw new IllegalArgumentException("Startdatum ist nach dem Enddatum!");
             }
-            
+
             t = new Task(taskName.getText().trim(), von, nach, fahrt, cbCategory.getSelectionModel().getSelectedItem().getCatBez(),
                     priority, taNote.getText().trim(), cbDeletable.isSelected(), false);
+            try {
+                // DAO-Methode!!!
+                int lastID = dao.getAllTasks()
+                        .stream()
+                        .mapToInt(task -> task.getId())
+                        .max()
+                        .getAsInt();
+                t.setId(lastID + 1);
+                dao.insertTask(t);
+                task = t;
+                Notifier.INSTANCE.notifyInfo("Task hinzugefügt", "Der neue Task wurde erfolreich angelegt!");
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        stage.close();
+                    }
+                });
+            } catch (MMTDBException ex) {
+                Notifier.INSTANCE.notifyError("Fehler", "Der Task wurde nicht hinzugefügt!");
+            }
         } catch (Exception ex) {
             Alert a = new Alert(Alert.AlertType.ERROR);
             a.setTitle("Error");
@@ -107,34 +128,23 @@ public class AddTaskController implements Initializable {
             a.setContentText(ex.getMessage());
             a.showAndWait();
         }
-
-        try {
-            int lastID = dao.getAllTasks()
-                    .stream()
-                    .mapToInt(task -> task.getId())
-                    .max()
-                    .getAsInt();
-            t.setId(lastID + 1);
-            dao.insertTask(t);
-            Alert a = new Alert(Alert.AlertType.INFORMATION);
-            a.setTitle("Erfolgreich");
-            a.setContentText("Der neue Task wurde erfolgreich angelegt!");
-            a.showAndWait();
-            Notifier.INSTANCE.notifyInfo("Task hinzugefügt", "Der neue Task wurde erfolreich angelegt!");
-        } catch (MMTDBException ex) {
-            Logger.getLogger(AddAppController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
     }
 
     private void setUpEnv() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                taskName.requestFocus();
+            }
+        });
 
         dateBegin.setValue(LocalDate.now());
         timeBegin.setValue(LocalTime.now());
 
         cbLocs.getItems().addAll(dao.getAllLocations());
+        cbLocs.getSelectionModel().selectFirst();
         cbCategory.getItems().addAll(dao.getAllCategories());
-
+        cbCategory.getSelectionModel().selectFirst();
         cbHoch.setOnMouseClicked((event) -> {
             handlePrio(TaskPriority.HIGH);
         });
@@ -144,7 +154,6 @@ public class AddTaskController implements Initializable {
         cbNiedrig.setOnMouseClicked((event) -> {
             handlePrio(TaskPriority.LOW);
         });
-        taskName.requestFocus();
     }
 
     private void handlePrio(TaskPriority priority) {
@@ -165,7 +174,7 @@ public class AddTaskController implements Initializable {
         }
 
     }
-    
+
     public TaskPriority getSelectedPriority() {
         if (cbHoch.isSelected()) {
             return TaskPriority.HIGH;
@@ -177,4 +186,11 @@ public class AddTaskController implements Initializable {
         return null;
     }
 
+    public Task getTask() {
+        return task;
+    }
+
+    public void setDialogStage(Stage stage) {
+        this.stage = stage;
+    }
 }

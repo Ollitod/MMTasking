@@ -5,6 +5,7 @@
  */
 package at.htlstp.syp.mmtasking.controller;
 
+import at.htlstp.syp.mmtasking.MainApp;
 import at.htlstp.syp.mmtasking.db.MMTDAO;
 import at.htlstp.syp.mmtasking.db.MMTDBException;
 import at.htlstp.syp.mmtasking.model.Appointment;
@@ -25,16 +26,12 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -43,6 +40,7 @@ import javafx.beans.binding.StringBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -60,7 +58,9 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
@@ -152,6 +152,8 @@ public class MainAppController implements Initializable {
 
     private Task selectedTask;
 
+    private MainApp mainApp;
+
     /**
      * Initializes the controller class.
      */
@@ -179,15 +181,20 @@ public class MainAppController implements Initializable {
 
         // Finalisierung
         btnFinalize.setOnAction((ActionEvent e) -> {
-            Task t = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
-            t.finalizeTask();
-            try {
-                dao.updateTask(t);
-                Notifier.INSTANCE.notifySuccess("Erfolg!", "Task wurde finalisiert!");
-            } catch (MMTDBException ex) {
-                Notifier.INSTANCE.notifyError("Fehler!", "Task wurde nicht finalisiert!");
+            if (!lvAusstehendeTasks.getItems().isEmpty()) {
+                Task t = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
+                t.finalizeTask();
+                try {
+                    dao.updateTask(t);
+                    tasks.set(tasks.indexOf(t), t);
+                    initFinalizing();
+                    Notifier.INSTANCE.notifySuccess("Erfolg!", "Task wurde finalisiert!");
+                } catch (MMTDBException ex) {
+                    Notifier.INSTANCE.notifyError("Fehler!", "Task wurde nicht finalisiert!");
+                }
+            } else {
+                Notifier.INSTANCE.notifyError("Fehler!", "Es sind keine Tasks zu finalisieren!");
             }
-            refreshTasks();
         });
 
         // Bearbeiten
@@ -207,6 +214,12 @@ public class MainAppController implements Initializable {
             tabPane.getSelectionModel().select(1);
         });
 
+//        tabPane.getSelectionModel().selectedItemProperty().addListener((Observable observable) -> {
+//            Tab t = (Tab) observable;
+//            if (t.getText().equals("Finalisierung")) {
+//                initFinalizing();
+//            }
+//        });
         // Analyse initialiseren
         setupAnalyse();
 
@@ -243,6 +256,17 @@ public class MainAppController implements Initializable {
                 return new TaskListCell();
             }
         });
+
+        lvAusstehendeTasks.setCellFactory(new Callback<ListView<Task>, ListCell<Task>>() {
+            @Override
+            public ListCell<Task> call(ListView<Task> param) {
+                return new TaskListCell();
+            }
+        });
+    }
+
+    public void setMainApplication(MainApp mainApp) {
+        this.mainApp = mainApp;
     }
 
     private void refreshTasks() {
@@ -285,14 +309,15 @@ public class MainAppController implements Initializable {
         lvTaskM.setItems(tasks);
         lvTaskM.getSelectionModel().selectFirst();
         lvTaskM.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+        tasks.addListener((Observable obs) -> {
+            initFinalizing();
+        });
     }
 
     private void initFinalizing() {
-        // Replace with new DAO method!!!
-        lvAusstehendeTasks.getItems().addAll(dao.getAllTasks()
-                .stream()
-                .filter(t -> !t.isFinalized())
-                .collect(Collectors.toList()));
+        lvAusstehendeTasks.getItems().clear();
+        lvAusstehendeTasks.getItems().addAll(dao.getAusstehendeTasks());
         lvAusstehendeTasks.getSelectionModel().selectFirst();
     }
 
@@ -331,24 +356,30 @@ public class MainAppController implements Initializable {
 //        tabPane.getSelectionModel().select(1);
 //    }
     private void setUpDetailView() {
-        lvTaskM.getSelectionModel().selectedItemProperty().addListener(listener -> {
-            selectedTask = lvTaskM.getSelectionModel().getSelectedItem();
+        lvTaskM.setOnMouseClicked((MouseEvent event) -> {
+            if (event.getClickCount() == 2) {
+                selectedTask = lvTaskM.getSelectionModel().getSelectedItem();
 
-            tfTaskD.setText(selectedTask.getTitle());
-            Category c = Category.getCategory(selectedTask.getCategory());
-            cbCategoryD.getSelectionModel().select(c);
-            dateVonD.setValue(selectedTask.getBeginning().toLocalDate());
-            dateBisD.setValue(selectedTask.getEnd().toLocalDate());
-            timeVonD.setValue(selectedTask.getBeginning().toLocalTime());
-            timeBisD.setValue(selectedTask.getEnd().toLocalTime());
-            cbLocs.getSelectionModel().select(selectedTask.getFahrt().getNach());
+                tfTaskD.setText(selectedTask.getTitle());
+                Category c = Category.getCategory(selectedTask.getCategory());
+                cbCategoryD.getSelectionModel().select(c);
+                dateVonD.setValue(selectedTask.getBeginning().toLocalDate());
+                dateBisD.setValue(selectedTask.getEnd().toLocalDate());
+                timeVonD.setValue(selectedTask.getBeginning().toLocalTime());
+                timeBisD.setValue(selectedTask.getEnd().toLocalTime());
+                cbLocs.getSelectionModel().select(selectedTask.getFahrt().getNach());
 //            lblFahrzeit.setText("Die Fahrzeit beträgt " + task.getFahrt().getFahrzeit() + " min");
-            changePriority(selectedTask.getPriority());
-            cbDeleteableD.setSelected(selectedTask.isDeletable());
-            taCommentD.setText(selectedTask.getNote());
+                changePriority(selectedTask.getPriority());
+                cbDeleteableD.setSelected(selectedTask.isDeletable());
+                taCommentD.setText(selectedTask.getNote());
 
-            tabPane.getSelectionModel().select(1);
+                tabPane.getSelectionModel().select(1);
+            }
         });
+
+//        lvTaskM.getSelectionModel().selectedItemProperty().addListener(listener -> {
+//
+//        });
 
         cbHoch.setOnMouseClicked((event) -> {
             changePriority(TaskPriority.HIGH);
@@ -361,7 +392,6 @@ public class MainAppController implements Initializable {
         cbNiedrig.setOnMouseClicked((event) -> {
             changePriority(TaskPriority.LOW);
         });
-
     }
 
     private void changePriority(TaskPriority priority) {
@@ -397,16 +427,21 @@ public class MainAppController implements Initializable {
     private void openTaskDialog(ActionEvent event) {
         Stage stage = new Stage();
         Parent root = null;
+        AddTaskController ctrl = null;
         try {
-            root = FXMLLoader.load(getClass().getResource("/AddTask.fxml"));
+            FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/AddTask.fxml"));
+            root = loader.load();
+            ctrl = loader.getController();
+            ctrl.setDialogStage(stage);
         } catch (IOException ex) {
-            System.err.println("Task Dialog fail");
-            //Logger.getLogger(this.class.getName()).log(Level.SEVERE, null, ex);
+            Notifier.INSTANCE.notifyError("Fehler", "Dialog konnte nicht geöffnet werden!");
         }
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.show();
+        stage.setTitle("Task hinzufügen");
+        stage.showAndWait();
+        tasks.add(ctrl.getTask());
     }
 
     @FXML
@@ -485,7 +520,7 @@ public class MainAppController implements Initializable {
     private void setupAnalyse() {
         cbFilter.getItems().addAll("Category", "Location");
         cbFilter.getSelectionModel().selectFirst();
-        dateVonAnalyse.setValue(LocalDate.now());
+        dateVonAnalyse.setValue(LocalDate.ofYearDay(LocalDate.now().getYear(), 1));
         dateBisAnalyse.setValue(LocalDate.now());
         cbFilter.getSelectionModel().selectedItemProperty().addListener((Observable observable) -> {
             analyse();
@@ -503,13 +538,8 @@ public class MainAppController implements Initializable {
         barChart.getData().clear();
         LocalDateTime von;
         LocalDateTime bis;
-        Double zeitInsgesamt = 0.0;
-        List<Task> tasks = null;
-        Map<String, Double> mapTaskTime = new LinkedHashMap<>();;
-        List<PieChart.Data> listPie = new LinkedList<>();        //PieChart
-        List<XYChart.Series> serien = new LinkedList<>();       //BarChart
-        XYChart.Series series;    //BarChart
 
+        // Von
         if (dateVonAnalyse.getValue() == null) {
             von = LocalDate.now().atStartOfDay();
             dateVonAnalyse.setValue(LocalDate.now());
@@ -517,6 +547,7 @@ public class MainAppController implements Initializable {
             von = dateVonAnalyse.getValue().atStartOfDay();
         }
 
+        // Bis
         if (dateBisAnalyse.getValue() == null) {
             bis = LocalDate.now().plusDays(1).atStartOfDay();
             dateBisAnalyse.setValue(LocalDate.now());
@@ -524,12 +555,23 @@ public class MainAppController implements Initializable {
             bis = dateBisAnalyse.getValue().plusDays(1).atStartOfDay();
         }
 
+        // Charts erstellen
+//        createPieChartAnalysis(von, bis);
+//        createBarChartAnalysis(von, bis);
+        Double zeitInsgesamt = 0.0;
+        List<Task> tasks = null;
+        Map<String, Double> mapTaskTime = new LinkedHashMap<>();;
+        List<PieChart.Data> listPie = new LinkedList<>();        //PieChart
+        List<XYChart.Series> serien = new LinkedList<>();       //BarChart
+        XYChart.Series series;    //BarChart
+
         try {
-            tasks = MMTDAO.getInstance().getTasksByPeriod(von, bis);
+            tasks = dao.getTasksByPeriod(von, bis);
         } catch (MMTDBException ex) {
-            Logger.getLogger(MainAppController.class.getName()).log(Level.SEVERE, null, ex);
+            Notifier.INSTANCE.notifyError("Fehler", ex.getMessage());
         }
 
+        // Nach Kategorie
         if (cbFilter.getSelectionModel().getSelectedItem().equals("Category")) {
             for (Task task : tasks) {                                                                                       // Map erstellen, von der Kategorie mit der dazugehörigen Zeit
                 if (mapTaskTime.get(task.getCategory()) == null) {
@@ -540,16 +582,13 @@ public class MainAppController implements Initializable {
             }
 
             for (String cat : mapTaskTime.keySet()) {
-
                 series = new XYChart.Series();
-
                 listPie.add(new PieChart.Data(cat, Math.round(zeitInsgesamt / mapTaskTime.get(cat))));                    //Pie Chart mit Prozent Werten füllen
                 series.getData().add(new XYChart.Data(cat, mapTaskTime.get(cat)));                                        //Bar Chart Serien erstellen 
                 series.setName(cat);
                 serien.add(series);
             }
-
-        } else {
+        } else {  // Nach Ort
             for (Task task : tasks) {                                                                                // Map erstellen, von der Kategorie mit der dazugehörigen Zeit
                 if (!mapTaskTime.containsKey(task.getFahrt().getNach().getName())) {
                     mapTaskTime.put(task.getFahrt().getNach().getName(), 0.0);
@@ -559,13 +598,11 @@ public class MainAppController implements Initializable {
             }
 
             for (String location : mapTaskTime.keySet()) {
-
                 series = new XYChart.Series();
                 listPie.add(new PieChart.Data(location, Math.round((mapTaskTime.get(location) / zeitInsgesamt) * 100)));     //Pie Chart mit Prozent Werten füllen
                 series.getData().add(new XYChart.Data(location, Math.round(mapTaskTime.get(location))));                      //Bar Chart Serien erstellen 
                 series.setName(location);
                 serien.add(series);
-
             }
         }
 
@@ -574,5 +611,19 @@ public class MainAppController implements Initializable {
         pieChart.setLegendSide(Side.BOTTOM);
         serien.stream().forEach(s -> barChart.getData().addAll(s));
 
+    }
+
+    private void createPieChartAnalysis(LocalDateTime von, LocalDateTime bis) {
+        try {
+            List<Task> tasks = dao.getTasksByPeriod(von, bis);
+        } catch (MMTDBException ex) {
+            Notifier.INSTANCE.notifyError("Fehler", ex.getMessage());
+        }
+        List<PieChart.Data> listPie = new LinkedList<>();        //PieChart
+    }
+
+    private void createBarChartAnalysis(LocalDateTime von, LocalDateTime bis) {
+        List<XYChart.Series> serien = new LinkedList<>();       //BarChart
+        XYChart.Series series;    //BarChart
     }
 }
