@@ -25,6 +25,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -55,10 +56,13 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import javafx.util.Duration;
 
 /**
@@ -138,13 +142,15 @@ public class MainAppController implements Initializable {
     private ObservableList<Location> locations = FXCollections.observableArrayList();
     private ObservableList<Task> tasks = FXCollections.observableArrayList();
     private ObservableList<Appointment> appointments = FXCollections.observableArrayList();
-    
+
     @FXML
     private BarChart<String, Number> barChart;
     @FXML
     private ChoiceBox<String> cbFilter;
     @FXML
     private PieChart pieChart;
+
+    private Task selectedTask;
 
     /**
      * Initializes the controller class.
@@ -153,16 +159,25 @@ public class MainAppController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         LocalDateTime current;
 
+        // Benutzernamen setzen
         lblCurrentUser.setText("Current User: Alexandra Meinhard");
-        
+
+        // Uhrzeit initialisieren
         initTimeTimeline();
+
+        // Datum initialisieren
         initDateTimeline();
-        
+
+        // Daten aus DB laden
         initData();
 
+        // Finalisierung initialiseren (verbessern!)
         initFinalizing();
 
+        // Controls initialiseren
         setUpEnv();
+
+        // Finalisierung
         btnFinalize.setOnAction((ActionEvent e) -> {
             Task t = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
             t.finalizeTask();
@@ -175,22 +190,24 @@ public class MainAppController implements Initializable {
             refreshTasks();
         });
 
+        // Bearbeiten
         btnEdit.setOnAction(e -> {
-            Task task = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
-            tfTaskD.setText(task.getTitle());
+            selectedTask = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
+            tfTaskD.setText(selectedTask.getTitle());
             //cbCategory.getItems().contains(task.getCategory());
             //cbCategory.setSelectionModel();
-            dateVonD.setValue(task.getBeginning().toLocalDate());
-            dateBisD.setValue(task.getEnd().toLocalDate());
-            timeVonD.setValue(task.getBeginning().toLocalTime());
-            timeBisD.setValue(task.getEnd().toLocalTime());
-            changePriority(task.getPriority());
-            cbDeleteableD.setSelected(task.isDeletable());
-            taCommentD.setText(task.getNote());
+            dateVonD.setValue(selectedTask.getBeginning().toLocalDate());
+            dateBisD.setValue(selectedTask.getEnd().toLocalDate());
+            timeVonD.setValue(selectedTask.getBeginning().toLocalTime());
+            timeBisD.setValue(selectedTask.getEnd().toLocalTime());
+            changePriority(selectedTask.getPriority());
+            cbDeleteableD.setSelected(selectedTask.isDeletable());
+            taCommentD.setText(selectedTask.getNote());
 
             tabPane.getSelectionModel().select(1);
         });
 
+        // Analyse initialiseren
         setupAnalyse();
 
 //        LocalDateTime future = LocalDateTime.now().plusMinutes(15);
@@ -215,34 +232,59 @@ public class MainAppController implements Initializable {
 //        }), new KeyFrame(Duration.seconds(1)));
 //        autologout.setCycleCount(15 * 60);
 //        autologout.play();
-
         setUpDetailView();
-        
+
         lvTerminM.setItems(appointments);
         initFahrzeitBinding();
+
+        lvTaskM.setCellFactory(new Callback<ListView<Task>, ListCell<Task>>() {
+            @Override
+            public ListCell<Task> call(ListView<Task> param) {
+                return new TaskListCell();
+            }
+        });
     }
-    
+
     private void refreshTasks() {
+        tasks.clear();
         tasks.addAll(dao.getAllTasks());
     }
-    
+
     private void refreshAppointments() {
+        appointments.clear();
         appointments.addAll(dao.getAllAppointments());
     }
-    
+
     private void refreshCategories() {
-         categories.addAll(dao.getAllCategories());
+        categories.clear();
+        categories.addAll(dao.getAllCategories());
     }
-    
+
     private void refreshLocations() {
+        locations.clear();
         locations.addAll(dao.getAllLocations());
     }
-    
+
     private void initData() {
         refreshTasks();
         refreshAppointments();
         refreshCategories();
         refreshLocations();
+    }
+
+    private void setUpEnv() {
+//        categories = FXCollections.observableArrayList(dao.getAllCategories());
+//        locations = FXCollections.observableArrayList(dao.getAllLocations());
+        cbLocs.setItems(locations);
+        cbLocs.getSelectionModel().selectFirst();
+        cbCategoryD.setItems(categories);
+        cbCategoryD.getSelectionModel().selectFirst();
+
+        lvTerminM.setItems(appointments);
+
+        lvTaskM.setItems(tasks);
+        lvTaskM.getSelectionModel().selectFirst();
+        lvTaskM.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     }
 
     private void initFinalizing() {
@@ -289,22 +331,21 @@ public class MainAppController implements Initializable {
 //        tabPane.getSelectionModel().select(1);
 //    }
     private void setUpDetailView() {
-        lvTaskM.setItems(tasks);
         lvTaskM.getSelectionModel().selectedItemProperty().addListener(listener -> {
-            Task task = lvTaskM.getSelectionModel().getSelectedItem();
+            selectedTask = lvTaskM.getSelectionModel().getSelectedItem();
 
-            tfTaskD.setText(task.getTitle());
-            Category c = Category.getCategory(task.getCategory());
+            tfTaskD.setText(selectedTask.getTitle());
+            Category c = Category.getCategory(selectedTask.getCategory());
             cbCategoryD.getSelectionModel().select(c);
-            dateVonD.setValue(task.getBeginning().toLocalDate());
-            dateBisD.setValue(task.getEnd().toLocalDate());
-            timeVonD.setValue(task.getBeginning().toLocalTime());
-            timeBisD.setValue(task.getEnd().toLocalTime());
-            cbLocs.getSelectionModel().select(task.getFahrt().getNach());
+            dateVonD.setValue(selectedTask.getBeginning().toLocalDate());
+            dateBisD.setValue(selectedTask.getEnd().toLocalDate());
+            timeVonD.setValue(selectedTask.getBeginning().toLocalTime());
+            timeBisD.setValue(selectedTask.getEnd().toLocalTime());
+            cbLocs.getSelectionModel().select(selectedTask.getFahrt().getNach());
 //            lblFahrzeit.setText("Die Fahrzeit beträgt " + task.getFahrt().getFahrzeit() + " min");
-            changePriority(task.getPriority());
-            cbDeleteableD.setSelected(task.isDeletable());
-            taCommentD.setText(task.getNote());
+            changePriority(selectedTask.getPriority());
+            cbDeleteableD.setSelected(selectedTask.isDeletable());
+            taCommentD.setText(selectedTask.getNote());
 
             tabPane.getSelectionModel().select(1);
         });
@@ -327,8 +368,6 @@ public class MainAppController implements Initializable {
         cbHoch.setSelected(false);
         cbMittel.setSelected(false);
         cbNiedrig.setSelected(false);
-
-        Notifier.INSTANCE.notifyInfo("Info", "This is an info");
         switch (priority) {
             case HIGH:
                 cbHoch.setSelected(true);
@@ -387,15 +426,6 @@ public class MainAppController implements Initializable {
 
     }
 
-    private void setUpEnv() {
-//        categories = FXCollections.observableArrayList(dao.getAllCategories());
-//        locations = FXCollections.observableArrayList(dao.getAllLocations());
-        cbLocs.getItems().addAll(dao.getAllLocations());
-        cbLocs.getSelectionModel().selectFirst();
-        cbCategoryD.getItems().addAll(dao.getAllCategories());
-        cbCategoryD.getSelectionModel().selectFirst();
-    }
-
     @FXML
     private void helpClicked(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -407,6 +437,33 @@ public class MainAppController implements Initializable {
 
     @FXML
     private void handleUebernehmen(ActionEvent event) {
+        selectedTask.setTitle(tfTaskD.getText().trim());
+        selectedTask.setCategory(cbCategoryD.getSelectionModel().getSelectedItem().getCatBez());
+        selectedTask.setBeginning(LocalDateTime.of(dateVonD.getValue(), timeVonD.getValue()));
+        selectedTask.setEnd(LocalDateTime.of(dateVonD.getValue(), timeVonD.getValue()));
+        selectedTask.setFahrt(dao.getFahrtNach(cbLocs.getValue()));
+
+        TaskPriority p = null;
+        if (cbHoch.isSelected()) {
+            p = TaskPriority.HIGH;
+        } else if (cbMittel.isSelected()) {
+            p = TaskPriority.MEDIUM;
+        } else if (cbNiedrig.isSelected()) {
+            p = TaskPriority.LOW;
+        }
+        selectedTask.setPriority(p);
+        selectedTask.setDeletable(cbDeleteableD.isSelected());
+        selectedTask.setNote(taCommentD.getText().trim());
+
+        try {
+            dao.updateTask(selectedTask);
+            tasks.set(tasks.indexOf(selectedTask), selectedTask);
+            Notifier.INSTANCE.notifySuccess("Task upgedated!", "Der Task wurde erfolgreich upgedated!");
+//            refreshTasks();
+            tabPane.getSelectionModel().select(0);
+        } catch (MMTDBException ex) {
+            Notifier.INSTANCE.notifyError("Fehlgeschlagen!", "Task wurde nicht upgedated!");
+        }
     }
 
     private void initFahrzeitBinding() {

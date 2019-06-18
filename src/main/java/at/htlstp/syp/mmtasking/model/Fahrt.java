@@ -42,9 +42,9 @@ public class Fahrt implements Serializable {
         
     }
     
-    public Fahrt(Location von, Location bis, Integer fahrzeit) {
+    public Fahrt(Location von, Location nach, Integer fahrzeit) {
         this.von = von;
-        this.nach = bis;
+        this.nach = nach;
         this.fahrzeit = fahrzeit;
     }
 

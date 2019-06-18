@@ -63,7 +63,8 @@ public class Location implements Serializable {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 17 * hash + Objects.hashCode(this.id);
+        hash = 23 * hash + Objects.hashCode(this.id);
+        hash = 23 * hash + Objects.hashCode(this.name);
         return hash;
     }
 
@@ -79,11 +80,16 @@ public class Location implements Serializable {
             return false;
         }
         final Location other = (Location) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
         if (!Objects.equals(this.id, other.id)) {
             return false;
         }
         return true;
     }
+
+    
 
     @Override
     public String toString() {

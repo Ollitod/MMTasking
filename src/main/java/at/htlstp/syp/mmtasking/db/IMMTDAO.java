@@ -119,5 +119,5 @@ public interface IMMTDAO {
   boolean deleteAppointment(Appointment t) throws MMTDBException;
   
   
-  
+  List<Task> getTasksByPeriod(LocalDateTime start, LocalDateTime end) throws MMTDBException;
 }

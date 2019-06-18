@@ -39,17 +39,47 @@ public class MMTDAO implements IMMTDAO {
     @Override
     public List<Task> getAllTasks() {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Task> jQuery = em.createQuery("select t from Task t", Task.class);
-        return jQuery.getResultList();
+        try {
+            TypedQuery<Task> jQuery = em.createQuery("select t from Task t", Task.class);
+            return jQuery.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Appointment> getAllAppointments() {
+        EntityManager em = JPAUtil.getEMF().createEntityManager();
+        try {
+            TypedQuery<Appointment> jQuery = em.createQuery("select a from Appointment a", Appointment.class);
+            return jQuery.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Category> getAllCategories() {
+        EntityManager em = JPAUtil.getEMF().createEntityManager();
+        try {
+            TypedQuery<Category> jQuery = em.createQuery("select c from Category c", Category.class);
+            return jQuery.getResultList();
+        } finally {
+            em.close();
+        }
     }
 
     public List<Location> getAllLocations() {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Location> jQuery = em.createQuery("select l from Location l ", Location.class);
-        return jQuery.getResultList();
+        try {
+            TypedQuery<Location> jQuery = em.createQuery("select l from Location l ", Location.class);
+            return jQuery.getResultList();
+        } finally {
+            em.close();
+        }
     }
 
     @Override
+    @Deprecated
     public List<Task> getTasksByLocation(String location) throws MMTDBException {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         TypedQuery<Task> jQuery = em.createQuery("select t from Task t where t.location = :location", Task.class);
@@ -60,12 +90,17 @@ public class MMTDAO implements IMMTDAO {
     @Override
     public List<Task> getTasksBetween(LocalDateTime start, LocalDateTime end) throws MMTDBException {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Task> jQuery = em.createQuery("select t from Task t where t.beginning between :start and :end or t.end between :start and :end", Task.class);
-        jQuery.setParameter("start", start);
-        jQuery.setParameter("end", end);
-        return jQuery.getResultList();
+        try {
+            TypedQuery<Task> jQuery = em.createQuery("select t from Task t where t.beginning between :start and :end or t.end between :start and :end", Task.class);
+            jQuery.setParameter("start", start);
+            jQuery.setParameter("end", end);
+            return jQuery.getResultList();
+        } finally {
+            em.close();
+        }
     }
 
+    // BIS HIER KONTROLLIERT!!!
     @Override
     public List<Task> getTasksByCategory(String category) throws MMTDBException {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
@@ -97,26 +132,26 @@ public class MMTDAO implements IMMTDAO {
     public boolean updateTask(Task t) throws MMTDBException {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         EntityTransaction tx = em.getTransaction();
+
         Task dbT = null;
         if (t.getId() != null) {
             dbT = em.find(Task.class, t.getId());
         }
         try {
-            if (dbT == null) {
-                try {
-                    tx.begin();
+            try {
+                tx.begin();
+                if (dbT == null) {
                     em.persist(t);
-                    tx.commit();
-                    return true;
-                } catch (Exception ex) {
-                    if (tx.isActive()) {
-                        tx.rollback();
-                    }
-                    throw new MMTDBException(ex.getMessage());
+                } else {
+                    em.merge(t);
                 }
-            } else {
-                em.merge(dbT);
+                tx.commit();
                 return true;
+            } catch (Exception ex) {
+                if (tx.isActive()) {
+                    tx.rollback();
+                }
+                throw new MMTDBException(ex.getMessage());
             }
         } finally {
             em.close();
@@ -143,13 +178,6 @@ public class MMTDAO implements IMMTDAO {
     }
 
     @Override
-    public List<Appointment> getAllAppointments() {
-        EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Appointment> jQuery = em.createQuery("select a from Appointment a", Appointment.class);
-        return jQuery.getResultList();
-    }
-
-    @Override
     public boolean insertAppointment(Appointment t) throws MMTDBException {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -173,8 +201,10 @@ public class MMTDAO implements IMMTDAO {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         Appointment dbT = null;
+
         if (appt.getId() != null) {
-            dbT = em.find(Appointment.class, appt.getId());
+            dbT = em.find(Appointment.class,
+                    appt.getId());
         }
         try {
             if (dbT == null) {
@@ -222,7 +252,8 @@ public class MMTDAO implements IMMTDAO {
 
     public List<Category> getCategoriesforAnalyse() {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Category> jQuery = em.createQuery("select c from Category c", Category.class);
+        TypedQuery<Category> jQuery = em.createQuery("select c from Category c", Category.class
+        );
         return jQuery.getResultList();
     }
 
@@ -230,24 +261,17 @@ public class MMTDAO implements IMMTDAO {
         List<Location> locations = new ArrayList<>();
 
         EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Location> jQuery = em.createQuery("select l from Location l", Location.class);
+        TypedQuery<Location> jQuery = em.createQuery("select l from Location l", Location.class
+        );
         return jQuery.getResultList();
-    }
-
-    public List<Category> getAllCategories() {
-        EntityManager em = JPAUtil.getEMF().createEntityManager();
-        try {
-            TypedQuery<Category> jQuery = em.createQuery("select c from Category c", Category.class);
-            return jQuery.getResultList();
-        } finally {
-            em.close();
-        }
     }
 
     public Category findCategoryByName(String bezeichnung) {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
+
         try {
-            TypedQuery<Category> jQuery = em.createQuery("select c from Category c where c.catBez = :bez", Category.class);
+            TypedQuery<Category> jQuery = em.createQuery("select c from Category c where c.catBez = :bez", Category.class
+            );
             jQuery.setParameter("bez", bezeichnung);
             return jQuery.getSingleResult();
         } finally {
@@ -257,6 +281,7 @@ public class MMTDAO implements IMMTDAO {
 
     public Fahrt getFahrtNach(Location location) {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
+
         try {
             TypedQuery<Fahrt> jQuery = em.createQuery("select f from Fahrt f where f.von = :von and f.nach = :nach", Fahrt.class);
             Location von = this.findLocationByName("Irnfritz");
@@ -270,8 +295,10 @@ public class MMTDAO implements IMMTDAO {
 
     public Location findLocationByName(String name) {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
+
         try {
-            TypedQuery<Location> jQuery = em.createQuery("select l from Location l where l.name = :name", Location.class);
+            TypedQuery<Location> jQuery = em.createQuery("select l from Location l where l.name = :name", Location.class
+            );
             jQuery.setParameter("name", name);
             return jQuery.getSingleResult();
         } finally {
@@ -279,10 +306,11 @@ public class MMTDAO implements IMMTDAO {
         }
     }
 
-//    @Override
+    @Override
     public List<Task> getTasksByPeriod(LocalDateTime start, LocalDateTime end) throws MMTDBException {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Task> jQuery = em.createQuery("select t from Task t where t.beginning between :start and :end or t.end between :start and :end", Task.class);
+        TypedQuery<Task> jQuery = em.createQuery("select t from Task t where t.beginning between :start and :end or t.end between :start and :end", Task.class
+        );
         jQuery.setParameter("start", start);
         jQuery.setParameter("end", end);
         return jQuery.getResultList();
