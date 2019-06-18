@@ -10,9 +10,9 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -26,9 +26,17 @@ public class Appointment implements Serializable {
     @Id
     @Column(name = "app_id")
     private Integer id;
+    
+    @Column(name = "app_title")
     private String title;
+    
+    @JoinColumn(name = "app_loc_id", referencedColumnName = "loc_id")
     private Location location;
+    
+    @Column(name = "app_date")
     private LocalDateTime date;
+    
+    @Column(name = "app_note")
     private String note;
 
     public Appointment() {

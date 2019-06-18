@@ -115,12 +115,7 @@ public class MMTDAO implements IMMTDAO {
                     throw new MMTDBException(ex.getMessage());
                 }
             } else {
-                dbT.setBeginning(t.getBeginning());
-                dbT.setCategory(t.getCategory());
-                dbT.setEnd(t.getEnd());
-                dbT.setNote(t.getNote());
-                dbT.setPriority(t.getPriority());
-                dbT.setTitle(t.getTitle());
+                em.merge(dbT);
                 return true;
             }
         } finally {
@@ -148,14 +143,10 @@ public class MMTDAO implements IMMTDAO {
     }
 
     @Override
-    public List<Appointment> getAllAppointments() throws MMTDBException {
-        List<Appointment> appointments = new ArrayList<>();
-
+    public List<Appointment> getAllAppointments() {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
-        TypedQuery<Appointment> jQuery = em.createQuery("select a from Appointment", Appointment.class
-        );
-        appointments = jQuery.getResultList();
-        return appointments;
+        TypedQuery<Appointment> jQuery = em.createQuery("select a from Appointment a", Appointment.class);
+        return jQuery.getResultList();
     }
 
     @Override
@@ -252,7 +243,7 @@ public class MMTDAO implements IMMTDAO {
             em.close();
         }
     }
-    
+
     public Category findCategoryByName(String bezeichnung) {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         try {
@@ -263,7 +254,7 @@ public class MMTDAO implements IMMTDAO {
             em.close();
         }
     }
-    
+
     public Fahrt getFahrtNach(Location location) {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         try {
@@ -276,7 +267,7 @@ public class MMTDAO implements IMMTDAO {
             em.close();
         }
     }
-    
+
     public Location findLocationByName(String name) {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         try {
@@ -287,7 +278,7 @@ public class MMTDAO implements IMMTDAO {
             em.close();
         }
     }
-    
+
 //    @Override
     public List<Task> getTasksByPeriod(LocalDateTime start, LocalDateTime end) throws MMTDBException {
         EntityManager em = JPAUtil.getEMF().createEntityManager();

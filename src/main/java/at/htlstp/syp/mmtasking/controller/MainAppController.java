@@ -82,9 +82,6 @@ public class MainAppController implements Initializable {
     private ListView<Appointment> lvTerminM;
     @FXML
     private Label lblFahrzeit;
-    private ChoiceBox<Category> cbKategorie;
-    private ChoiceBox<Location> cbOrt;
-    private ChoiceBox<TaskPriority> cbPriority;
     @FXML
     private JFXTextField tfTaskD;
     @FXML
@@ -137,8 +134,11 @@ public class MainAppController implements Initializable {
     private List<JFXCheckBox> checkboxes;
     private MMTDAO dao = MMTDAO.getInstance();
 
-    private ObservableList<Category> categories;
-    private ObservableList<Location> locations;
+    private ObservableList<Category> categories = FXCollections.observableArrayList();
+    private ObservableList<Location> locations = FXCollections.observableArrayList();
+    private ObservableList<Task> tasks = FXCollections.observableArrayList();
+    private ObservableList<Appointment> appointments = FXCollections.observableArrayList();
+    
     @FXML
     private BarChart<String, Number> barChart;
     @FXML
@@ -154,9 +154,11 @@ public class MainAppController implements Initializable {
         LocalDateTime current;
 
         lblCurrentUser.setText("Current User: Alexandra Meinhard");
-
+        
         initTimeTimeline();
         initDateTimeline();
+        
+        initData();
 
         initFinalizing();
 
@@ -164,7 +166,13 @@ public class MainAppController implements Initializable {
         btnFinalize.setOnAction((ActionEvent e) -> {
             Task t = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
             t.finalizeTask();
-            lvAusstehendeTasks.getItems().remove(t);
+            try {
+                dao.updateTask(t);
+                Notifier.INSTANCE.notifySuccess("Erfolg!", "Task wurde finalisiert!");
+            } catch (MMTDBException ex) {
+                Notifier.INSTANCE.notifyError("Fehler!", "Task wurde nicht finalisiert!");
+            }
+            refreshTasks();
         });
 
         btnEdit.setOnAction(e -> {
@@ -207,12 +215,34 @@ public class MainAppController implements Initializable {
 //        }), new KeyFrame(Duration.seconds(1)));
 //        autologout.setCycleCount(15 * 60);
 //        autologout.play();
-        ObservableList<Appointment> appointments = FXCollections.observableArrayList();
 
         setUpDetailView();
-
+        
         lvTerminM.setItems(appointments);
         initFahrzeitBinding();
+    }
+    
+    private void refreshTasks() {
+        tasks.addAll(dao.getAllTasks());
+    }
+    
+    private void refreshAppointments() {
+        appointments.addAll(dao.getAllAppointments());
+    }
+    
+    private void refreshCategories() {
+         categories.addAll(dao.getAllCategories());
+    }
+    
+    private void refreshLocations() {
+        locations.addAll(dao.getAllLocations());
+    }
+    
+    private void initData() {
+        refreshTasks();
+        refreshAppointments();
+        refreshCategories();
+        refreshLocations();
     }
 
     private void initFinalizing() {
@@ -259,7 +289,7 @@ public class MainAppController implements Initializable {
 //        tabPane.getSelectionModel().select(1);
 //    }
     private void setUpDetailView() {
-        lvTaskM.getItems().addAll(dao.getAllTasks());
+        lvTaskM.setItems(tasks);
         lvTaskM.getSelectionModel().selectedItemProperty().addListener(listener -> {
             Task task = lvTaskM.getSelectionModel().getSelectedItem();
 
@@ -322,22 +352,6 @@ public class MainAppController implements Initializable {
 
     public Timeline getAutologout() {
         return autologout;
-    }
-
-    public void setupCategoryDropdown() {
-        cbKategorie.getItems().addAll(dao.getCategoriesforAnalyse());
-    }
-
-    public void setupLocationDropdown() {
-        cbOrt.getItems().addAll(dao.getLocationsforAnalyse());
-    }
-
-    public void setupPriorityDropdown() {
-        ObservableList<TaskPriority> cat = FXCollections.observableArrayList();
-        cat.add(TaskPriority.HIGH);
-        cat.add(TaskPriority.MEDIUM);
-        cat.add(TaskPriority.LOW);
-        cbPriority.setItems(cat);
     }
 
     @FXML
