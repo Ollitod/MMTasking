@@ -279,13 +279,13 @@ public class MMTDAO implements IMMTDAO {
         }
     }
 
-    public Fahrt getFahrtNach(Location location) {
+    public Fahrt getFahrtNach(Location nach) {
         EntityManager em = JPAUtil.getEMF().createEntityManager();
         try {
             TypedQuery<Fahrt> jQuery = em.createQuery("select f from Fahrt f where f.von = :von and f.nach = :nach", Fahrt.class);
             Location von = this.findLocationByName("Irnfritz");
             jQuery.setParameter("von", von);
-            jQuery.setParameter("nach", location);
+            jQuery.setParameter("nach", nach);
             return jQuery.getSingleResult();
         } finally {
             em.close();

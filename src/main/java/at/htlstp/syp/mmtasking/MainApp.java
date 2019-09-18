@@ -15,6 +15,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 /**
@@ -42,6 +43,8 @@ public class MainApp extends Application {
         this.stage = stage;
         stage.setScene(scene);
         stage.setTitle("MMTasking - © 2019 MMTSolutions");
+        stage.getIcons().add(new Image(MainApp.class.getResourceAsStream("/favicon.png")));
+        stage.setResizable(false);
         stage.show();
     }
 
@@ -49,6 +52,7 @@ public class MainApp extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        Setup.runSetup();
         launch(args);
     }
 

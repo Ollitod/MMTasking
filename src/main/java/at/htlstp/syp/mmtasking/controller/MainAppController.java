@@ -40,7 +40,6 @@ import javafx.beans.binding.StringBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -58,9 +57,11 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
@@ -380,7 +381,6 @@ public class MainAppController implements Initializable {
 //        lvTaskM.getSelectionModel().selectedItemProperty().addListener(listener -> {
 //
 //        });
-
         cbHoch.setOnMouseClicked((event) -> {
             changePriority(TaskPriority.HIGH);
         });
@@ -571,9 +571,10 @@ public class MainAppController implements Initializable {
             Notifier.INSTANCE.notifyError("Fehler", ex.getMessage());
         }
 
-        // Nach Kategorie
+        // Check ob Kategorie ausgewählt ist
         if (cbFilter.getSelectionModel().getSelectedItem().equals("Category")) {
-            for (Task task : tasks) {                                                                                       // Map erstellen, von der Kategorie mit der dazugehörigen Zeit
+            // Map erstellen, von der Kategorie mit der dazugehörigen Zeit
+            for (Task task : tasks) {
                 if (mapTaskTime.get(task.getCategory()) == null) {
                     mapTaskTime.put(task.getCategory(), 0.0);
                 }
@@ -583,8 +584,10 @@ public class MainAppController implements Initializable {
 
             for (String cat : mapTaskTime.keySet()) {
                 series = new XYChart.Series();
-                listPie.add(new PieChart.Data(cat, Math.round(zeitInsgesamt / mapTaskTime.get(cat))));                    //Pie Chart mit Prozent Werten füllen
-                series.getData().add(new XYChart.Data(cat, mapTaskTime.get(cat)));                                        //Bar Chart Serien erstellen 
+                // Pie Chart mit Prozent Werten füllen
+                listPie.add(new PieChart.Data(cat, Math.round(zeitInsgesamt / mapTaskTime.get(cat))));
+                // Bar Chart Serien erstellen 
+                series.getData().add(new XYChart.Data(cat, mapTaskTime.get(cat)));
                 series.setName(cat);
                 serien.add(series);
             }
@@ -611,19 +614,5 @@ public class MainAppController implements Initializable {
         pieChart.setLegendSide(Side.BOTTOM);
         serien.stream().forEach(s -> barChart.getData().addAll(s));
 
-    }
-
-    private void createPieChartAnalysis(LocalDateTime von, LocalDateTime bis) {
-        try {
-            List<Task> tasks = dao.getTasksByPeriod(von, bis);
-        } catch (MMTDBException ex) {
-            Notifier.INSTANCE.notifyError("Fehler", ex.getMessage());
-        }
-        List<PieChart.Data> listPie = new LinkedList<>();        //PieChart
-    }
-
-    private void createBarChartAnalysis(LocalDateTime von, LocalDateTime bis) {
-        List<XYChart.Series> serien = new LinkedList<>();       //BarChart
-        XYChart.Series series;    //BarChart
-    }
+    }    
 }
