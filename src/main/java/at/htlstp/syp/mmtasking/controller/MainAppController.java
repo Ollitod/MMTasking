@@ -6,14 +6,17 @@
 package at.htlstp.syp.mmtasking.controller;
 
 import at.htlstp.syp.mmtasking.MainApp;
+import at.htlstp.syp.mmtasking.Setup;
 import at.htlstp.syp.mmtasking.db.MMTDAO;
 import at.htlstp.syp.mmtasking.db.MMTDBException;
 import at.htlstp.syp.mmtasking.model.Appointment;
 import at.htlstp.syp.mmtasking.model.Category;
 import at.htlstp.syp.mmtasking.model.Fahrt;
 import at.htlstp.syp.mmtasking.model.Location;
+import at.htlstp.syp.mmtasking.model.MMTUtil;
 import at.htlstp.syp.mmtasking.model.Task;
 import at.htlstp.syp.mmtasking.model.TaskPriority;
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXListView;
@@ -21,36 +24,50 @@ import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXTimePicker;
 import eu.hansolo.enzo.notification.Notification.Notifier;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.file.Paths;
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Bounds;
 import javafx.geometry.Side;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -58,10 +75,11 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TabPane;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
@@ -74,17 +92,11 @@ import javafx.util.Duration;
 public class MainAppController implements Initializable {
 
     @FXML
-    private Label lblAutoLogout;
-    @FXML
-    private Label lblCurrentUser;
-    @FXML
     private Label lblDate;
     @FXML
     private ListView<Task> lvTaskM;
     @FXML
     private Label lblTime;
-    @FXML
-    private ListView<Appointment> lvTerminM;
     @FXML
     private Label lblFahrzeit;
     @FXML
@@ -116,13 +128,9 @@ public class MainAppController implements Initializable {
     @FXML
     private TabPane tabPane;
     @FXML
-    private Button btnEdit;
-    @FXML
-    private Button btnFinalize;
-    @FXML
     private MenuItem menuTask;
-    @FXML
-    private MenuItem menuApp;
+//    @FXML
+//    private MenuItem menuApp;
     @FXML
     private ChoiceBox<Location> chbPrefLoc;
     @FXML
@@ -142,7 +150,6 @@ public class MainAppController implements Initializable {
     private ObservableList<Category> categories = FXCollections.observableArrayList();
     private ObservableList<Location> locations = FXCollections.observableArrayList();
     private ObservableList<Task> tasks = FXCollections.observableArrayList();
-    private ObservableList<Appointment> appointments = FXCollections.observableArrayList();
 
     @FXML
     private BarChart<String, Number> barChart;
@@ -155,16 +162,34 @@ public class MainAppController implements Initializable {
 
     private MainApp mainApp;
 
+    private DateTimeFormatter dtfFile = DateTimeFormatter.ofPattern("ddMMyyyy");
+    private DateTimeFormatter dtfStandard = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+    @FXML
+    private JFXButton btnSaveAnalysis;
+
+    private LocalDate beginPeriod;
+    private LocalDate endPeriod;
+
+    private FilteredList<Task> filteredTasks;
+
+    @FXML
+    private ChoiceBox<String> cbViewMode;
+
+    private final ObservableList<String> viewModes = FXCollections.observableArrayList("Woche", "Monat", "Jahr", "Alle");
+    
+    private int fromTab;
+    
+    @FXML
+    private Label caption;
+    @FXML
+    private JFXButton btnBack;
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        LocalDateTime current;
-
-        // Benutzernamen setzen
-        lblCurrentUser.setText("Current User: Alexandra Meinhard");
-
         // Uhrzeit initialisieren
         initTimeTimeline();
 
@@ -180,41 +205,6 @@ public class MainAppController implements Initializable {
         // Controls initialiseren
         setUpEnv();
 
-        // Finalisierung
-        btnFinalize.setOnAction((ActionEvent e) -> {
-            if (!lvAusstehendeTasks.getItems().isEmpty()) {
-                Task t = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
-                t.finalizeTask();
-                try {
-                    dao.updateTask(t);
-                    tasks.set(tasks.indexOf(t), t);
-                    initFinalizing();
-                    Notifier.INSTANCE.notifySuccess("Erfolg!", "Task wurde finalisiert!");
-                } catch (MMTDBException ex) {
-                    Notifier.INSTANCE.notifyError("Fehler!", "Task wurde nicht finalisiert!");
-                }
-            } else {
-                Notifier.INSTANCE.notifyError("Fehler!", "Es sind keine Tasks zu finalisieren!");
-            }
-        });
-
-        // Bearbeiten
-        btnEdit.setOnAction(e -> {
-            selectedTask = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
-            tfTaskD.setText(selectedTask.getTitle());
-            //cbCategory.getItems().contains(task.getCategory());
-            //cbCategory.setSelectionModel();
-            dateVonD.setValue(selectedTask.getBeginning().toLocalDate());
-            dateBisD.setValue(selectedTask.getEnd().toLocalDate());
-            timeVonD.setValue(selectedTask.getBeginning().toLocalTime());
-            timeBisD.setValue(selectedTask.getEnd().toLocalTime());
-            changePriority(selectedTask.getPriority());
-            cbDeleteableD.setSelected(selectedTask.isDeletable());
-            taCommentD.setText(selectedTask.getNote());
-
-            tabPane.getSelectionModel().select(1);
-        });
-
 //        tabPane.getSelectionModel().selectedItemProperty().addListener((Observable observable) -> {
 //            Tab t = (Tab) observable;
 //            if (t.getText().equals("Finalisierung")) {
@@ -222,33 +212,11 @@ public class MainAppController implements Initializable {
 //            }
 //        });
         // Analyse initialiseren
-        setupAnalyse();
+        setupAnalysis();
 
-//        LocalDateTime future = LocalDateTime.now().plusMinutes(15);
-//        logoutTime = Instant.now();
-//        autologout = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
-//            logoutTime.minusSeconds(1);
-//            lblAutoLogout.setText(timeFormatter.format(future.minus(LocalTime.now().toSecondOfDay())));
-//        }));
-//        autologout.setCycleCount(15 * 60);
-//        autologout.play();
-        // Autologut
-//        Timer timer = new Timer();
-//        timer.sch
 //        
-//        
-//        logoutTime = Instant.now().plus(java.time.Duration.ofMinutes(15));
-//        java.time.Duration.
-//        autologout = new Timeline(new KeyFrame(Duration.ZERO, e -> {
-//            System.out.println(logoutTime);
-//            lblAutoLogout.setText(timeFormatter.format(logoutTime));
-//            logoutTime = logoutTime.minusSeconds(1);
-//        }), new KeyFrame(Duration.seconds(1)));
-//        autologout.setCycleCount(15 * 60);
-//        autologout.play();
         setUpDetailView();
 
-        lvTerminM.setItems(appointments);
         initFahrzeitBinding();
 
         lvTaskM.setCellFactory(new Callback<ListView<Task>, ListCell<Task>>() {
@@ -270,14 +238,15 @@ public class MainAppController implements Initializable {
         this.mainApp = mainApp;
     }
 
+    public long getNumberOfTasksToday() {
+        return tasks.stream()
+                .filter(t -> t.getBeginning().toLocalDate().equals(LocalDate.now()))
+                .count();
+    }
+
     private void refreshTasks() {
         tasks.clear();
         tasks.addAll(dao.getAllTasks());
-    }
-
-    private void refreshAppointments() {
-        appointments.clear();
-        appointments.addAll(dao.getAllAppointments());
     }
 
     private void refreshCategories() {
@@ -292,7 +261,6 @@ public class MainAppController implements Initializable {
 
     private void initData() {
         refreshTasks();
-        refreshAppointments();
         refreshCategories();
         refreshLocations();
     }
@@ -304,16 +272,63 @@ public class MainAppController implements Initializable {
         cbLocs.getSelectionModel().selectFirst();
         cbCategoryD.setItems(categories);
         cbCategoryD.getSelectionModel().selectFirst();
+        cbViewMode.setItems(viewModes);
+        cbViewMode.getSelectionModel().selectFirst();
+        cbViewMode.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                switch (newValue) {
+                    case "Woche":
+                        changeViewOfTaskListView(ChronoUnit.WEEKS);
+                        break;
+                    case "Monat":
+                        changeViewOfTaskListView(ChronoUnit.MONTHS);
+                        break;
+                    case "Jahr":
+                        changeViewOfTaskListView(ChronoUnit.YEARS);
+                        break;
+                    case "Alle":
+                        changeViewOfTaskListView(null);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
 
-        lvTerminM.setItems(appointments);
-
-        lvTaskM.setItems(tasks);
-        lvTaskM.getSelectionModel().selectFirst();
+        lvTaskM.setPlaceholder(new Label("Keine Tasks im ausgewählten Zeitraum!"));
+        this.changeViewOfTaskListView(ChronoUnit.WEEKS);
         lvTaskM.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
         tasks.addListener((Observable obs) -> {
             initFinalizing();
         });
+    }
+
+    private void changeViewOfTaskListView(ChronoUnit unit) {
+        if (unit == null) {
+            lvTaskM.setItems(tasks);
+        } else {
+            switch (unit) {
+                case WEEKS:
+                    beginPeriod = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+                    endPeriod = LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+                    break;
+                case MONTHS:
+                    beginPeriod = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+                    endPeriod = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+                    break;
+                case YEARS:
+                    beginPeriod = LocalDate.now().with(TemporalAdjusters.firstDayOfYear());
+                    endPeriod = LocalDate.now().with(TemporalAdjusters.lastDayOfYear());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Tasks can only displayed per week, month, year or all tasks!");
+            }
+            filteredTasks = tasks.filtered(t -> MMTUtil.isDateBetweenInclusive(t.getBeginning().toLocalDate(), beginPeriod, endPeriod)
+                    || MMTUtil.isDateBetweenInclusive(t.getEnd().toLocalDate(), beginPeriod, endPeriod));
+            lvTaskM.setItems(filteredTasks);
+        }
     }
 
     private void initFinalizing() {
@@ -340,47 +355,14 @@ public class MainAppController implements Initializable {
         clock.play();
     }
 
-//    private InvalidationListener taskListener = (l) -> {
-//        l.
-//        Task task = lvTaskM.getSelectionModel().getSelectedItem();
-//
-//        tfTaskD.setText(task.getTitle());
-//        tfKategorieD.setText(task.getCategory());
-//        dateVon.setValue(task.getBeginning().toLocalDate());
-//        dateBis.setValue(task.getEnd().toLocalDate());
-//        timeVon.setValue(task.getBeginning().toLocalTime());
-//        timeBis.setValue(task.getEnd().toLocalTime());
-//        changePriority(task.getPriority());
-//        cbDeleteable.setSelected(task.isDeletable());
-//        taComment.setText(task.getNote());
-//
-//        tabPane.getSelectionModel().select(1);
-//    }
     private void setUpDetailView() {
         lvTaskM.setOnMouseClicked((MouseEvent event) -> {
             if (event.getClickCount() == 2) {
                 selectedTask = lvTaskM.getSelectionModel().getSelectedItem();
-
-                tfTaskD.setText(selectedTask.getTitle());
-                Category c = Category.getCategory(selectedTask.getCategory());
-                cbCategoryD.getSelectionModel().select(c);
-                dateVonD.setValue(selectedTask.getBeginning().toLocalDate());
-                dateBisD.setValue(selectedTask.getEnd().toLocalDate());
-                timeVonD.setValue(selectedTask.getBeginning().toLocalTime());
-                timeBisD.setValue(selectedTask.getEnd().toLocalTime());
-                cbLocs.getSelectionModel().select(selectedTask.getFahrt().getNach());
-//            lblFahrzeit.setText("Die Fahrzeit beträgt " + task.getFahrt().getFahrzeit() + " min");
-                changePriority(selectedTask.getPriority());
-                cbDeleteableD.setSelected(selectedTask.isDeletable());
-                taCommentD.setText(selectedTask.getNote());
-
-                tabPane.getSelectionModel().select(1);
+                setDetailView(0);
             }
         });
 
-//        lvTaskM.getSelectionModel().selectedItemProperty().addListener(listener -> {
-//
-//        });
         cbHoch.setOnMouseClicked((event) -> {
             changePriority(TaskPriority.HIGH);
         });
@@ -394,20 +376,39 @@ public class MainAppController implements Initializable {
         });
     }
 
+    private void setDetailView(int tab) {
+        tfTaskD.setText(selectedTask.getTitle());
+        Category c = Category.getCategory(selectedTask.getCategory());
+        cbCategoryD.getSelectionModel().select(c);
+        dateVonD.setValue(selectedTask.getBeginning().toLocalDate());
+        dateBisD.setValue(selectedTask.getEnd().toLocalDate());
+        timeVonD.setValue(selectedTask.getBeginning().toLocalTime());
+        timeBisD.setValue(selectedTask.getEnd().toLocalTime());
+        cbLocs.getSelectionModel().select(selectedTask.getFahrt().getNach());
+        changePriority(selectedTask.getPriority());
+        cbDeleteableD.setSelected(selectedTask.isDeletable());
+        taCommentD.setText(selectedTask.getNote());
+
+        fromTab = tab;
+        tabPane.getSelectionModel().select(1);
+    }
+
     private void changePriority(TaskPriority priority) {
         cbHoch.setSelected(false);
         cbMittel.setSelected(false);
         cbNiedrig.setSelected(false);
-        switch (priority) {
-            case HIGH:
-                cbHoch.setSelected(true);
-                break;
-            case MEDIUM:
-                cbMittel.setSelected(true);
-                break;
-            case LOW:
-                cbNiedrig.setSelected(true);
-                break;
+        if (priority != null) {
+            switch (priority) {
+                case HIGH:
+                    cbHoch.setSelected(true);
+                    break;
+                case MEDIUM:
+                    cbMittel.setSelected(true);
+                    break;
+                case LOW:
+                    cbNiedrig.setSelected(true);
+                    break;
+            }
         }
     }
 
@@ -440,26 +441,30 @@ public class MainAppController implements Initializable {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Task hinzufügen");
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initOwner(mainApp.getStage().getScene().getWindow());
         stage.showAndWait();
-        tasks.add(ctrl.getTask());
-    }
-
-    @FXML
-    private void openAppDialog(ActionEvent event) {
-        Stage stage = new Stage();
-        Parent root = null;
-        try {
-            root = FXMLLoader.load(getClass().getResource("/AddApp.fxml"));
-        } catch (IOException ex) {
-            System.err.println("Appointment Dialog fail");
-            //Logger.getLogger(this.class.getName()).log(Level.SEVERE, null, ex);
+        if (ctrl.getTask() != null) {
+            tasks.add(ctrl.getTask());
         }
-
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
-
     }
+
+//    @FXML
+//    private void openAppDialog(ActionEvent event) {
+//        Stage stage = new Stage();
+//        Parent root = null;
+//        try {
+//            root = FXMLLoader.load(getClass().getResource("/AddApp.fxml"));
+//        } catch (IOException ex) {
+//            System.err.println("Appointment Dialog fail");
+//            //Logger.getLogger(this.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//        Scene scene = new Scene(root);
+//        stage.setScene(scene);
+//        stage.show();
+//
+//    }
 
     @FXML
     private void helpClicked(ActionEvent event) {
@@ -475,7 +480,7 @@ public class MainAppController implements Initializable {
         selectedTask.setTitle(tfTaskD.getText().trim());
         selectedTask.setCategory(cbCategoryD.getSelectionModel().getSelectedItem().getCatBez());
         selectedTask.setBeginning(LocalDateTime.of(dateVonD.getValue(), timeVonD.getValue()));
-        selectedTask.setEnd(LocalDateTime.of(dateVonD.getValue(), timeVonD.getValue()));
+        selectedTask.setEnd(LocalDateTime.of(dateBisD.getValue(), timeBisD.getValue()));
         selectedTask.setFahrt(dao.getFahrtNach(cbLocs.getValue()));
 
         TaskPriority p = null;
@@ -491,14 +496,30 @@ public class MainAppController implements Initializable {
         selectedTask.setNote(taCommentD.getText().trim());
 
         try {
+            // Task in DB updaten
             dao.updateTask(selectedTask);
+
+            // Task in Programm updaten
             tasks.set(tasks.indexOf(selectedTask), selectedTask);
             Notifier.INSTANCE.notifySuccess("Task upgedated!", "Der Task wurde erfolgreich upgedated!");
-//            refreshTasks();
-            tabPane.getSelectionModel().select(0);
+            tabPane.getSelectionModel().select(fromTab);
+            clearDetailView();
         } catch (MMTDBException ex) {
             Notifier.INSTANCE.notifyError("Fehlgeschlagen!", "Task wurde nicht upgedated!");
         }
+    }
+
+    private void clearDetailView() {
+        tfTaskD.setText(null);
+        cbCategoryD.getSelectionModel().selectFirst();
+        dateVonD.setValue(null);
+        dateBisD.setValue(null);
+        timeVonD.setValue(null);
+        timeBisD.setValue(null);
+        cbLocs.getSelectionModel().selectFirst();
+        changePriority(null);
+        cbDeleteableD.setSelected(false);
+        taCommentD.setText(null);
     }
 
     private void initFahrzeitBinding() {
@@ -511,108 +532,229 @@ public class MainAppController implements Initializable {
             protected String computeValue() {
                 Location loc = cbLocs.getSelectionModel().getSelectedItem();
                 Fahrt f = dao.getFahrtNach(loc);
-                return "Die Fahrzeit beträgt " + f.getFahrzeit() + " min";
+                return f.getFahrzeit() + " min";
             }
         };
         lblFahrzeit.textProperty().bind(sb);
     }
 
-    private void setupAnalyse() {
+    private void setupAnalysis() {
+        pieChart.setLegendSide(Side.BOTTOM);
         cbFilter.getItems().addAll("Category", "Location");
         cbFilter.getSelectionModel().selectFirst();
-        dateVonAnalyse.setValue(LocalDate.ofYearDay(LocalDate.now().getYear(), 1));
+        dateVonAnalyse.setValue(LocalDate.now().with(TemporalAdjusters.firstDayOfYear()));
         dateBisAnalyse.setValue(LocalDate.now());
+
         cbFilter.getSelectionModel().selectedItemProperty().addListener((Observable observable) -> {
-            analyse();
+            performAnalysis();
         });
         dateVonAnalyse.valueProperty().addListener((Observable observable) -> {
-            analyse();
+            performAnalysis();
         });
         dateBisAnalyse.valueProperty().addListener((Observable observable) -> {
-            analyse();
+            performAnalysis();
         });
-
+        performAnalysis();
     }
 
-    private void analyse() {
-        barChart.getData().clear();
-        LocalDateTime von;
-        LocalDateTime bis;
+    private void performAnalysis() {
+        Double zeitInsgesamt = 0.0;
+        List<Task> tasksToAnalyse = null;
+        Map<String, Double> mapTaskTime = new LinkedHashMap<>();;
+        List<PieChart.Data> pieChartDataList = new LinkedList<>();        //PieChart
+        List<XYChart.Series<String, Number>> barChartDataList = new LinkedList<>();       //BarChart
+        XYChart.Series<String, Number> barChartSeries;    //BarChart
 
         // Von
         if (dateVonAnalyse.getValue() == null) {
-            von = LocalDate.now().atStartOfDay();
             dateVonAnalyse.setValue(LocalDate.now());
-        } else {
-            von = dateVonAnalyse.getValue().atStartOfDay();
         }
+        LocalDateTime von = dateVonAnalyse.getValue().atStartOfDay();
 
         // Bis
         if (dateBisAnalyse.getValue() == null) {
-            bis = LocalDate.now().plusDays(1).atStartOfDay();
-            dateBisAnalyse.setValue(LocalDate.now());
-        } else {
-            bis = dateBisAnalyse.getValue().plusDays(1).atStartOfDay();
+            dateBisAnalyse.setValue(LocalDate.now().plusDays(1));
         }
-
-        // Charts erstellen
-//        createPieChartAnalysis(von, bis);
-//        createBarChartAnalysis(von, bis);
-        Double zeitInsgesamt = 0.0;
-        List<Task> tasks = null;
-        Map<String, Double> mapTaskTime = new LinkedHashMap<>();;
-        List<PieChart.Data> listPie = new LinkedList<>();        //PieChart
-        List<XYChart.Series> serien = new LinkedList<>();       //BarChart
-        XYChart.Series series;    //BarChart
+        LocalDateTime bis = dateBisAnalyse.getValue().atStartOfDay();
 
         try {
-            tasks = dao.getTasksByPeriod(von, bis);
+            tasksToAnalyse = dao.getTasksByPeriod(von, bis);
         } catch (MMTDBException ex) {
-            Notifier.INSTANCE.notifyError("Fehler", ex.getMessage());
+            Notifier.INSTANCE.notifyError("Fehler!", ex.getMessage());
         }
 
-        // Check ob Kategorie ausgewählt ist
+        // Daten aus Bar Chart loeschen
+        barChart.getData().clear();
+
+        // Caption-Label überschreiben
+        caption.setText("");
+
+        // Nach Kategorie analysieren
         if (cbFilter.getSelectionModel().getSelectedItem().equals("Category")) {
-            // Map erstellen, von der Kategorie mit der dazugehörigen Zeit
-            for (Task task : tasks) {
+            // Map erstellen, die zu jeder Kategorie die aufgewandte Zeit speichert
+            for (Task task : tasksToAnalyse) {
                 if (mapTaskTime.get(task.getCategory()) == null) {
                     mapTaskTime.put(task.getCategory(), 0.0);
                 }
-                mapTaskTime.put(task.getCategory(), mapTaskTime.get(task.getCategory()) + (task.getTime() / 60));
-                zeitInsgesamt += task.getTime() / 60;
+                mapTaskTime.put(task.getCategory(), mapTaskTime.get(task.getCategory()) + (task.getTime() / 60.0));
+                zeitInsgesamt += task.getTime() / 60.0;
             }
 
-            for (String cat : mapTaskTime.keySet()) {
-                series = new XYChart.Series();
+            for (String category : mapTaskTime.keySet()) {
+                barChartSeries = new XYChart.Series();
                 // Pie Chart mit Prozent Werten füllen
-                listPie.add(new PieChart.Data(cat, Math.round(zeitInsgesamt / mapTaskTime.get(cat))));
-                // Bar Chart Serien erstellen 
-                series.getData().add(new XYChart.Data(cat, mapTaskTime.get(cat)));
-                series.setName(cat);
-                serien.add(series);
+                pieChartDataList.add(new PieChart.Data(category, Math.round((mapTaskTime.get(category) / zeitInsgesamt) * 100)));
+                // Bar Chart Serien erstellen
+                XYChart.Data data = new XYChart.Data(category, mapTaskTime.get(category));
+                barChartSeries.getData().add(data);
+                barChartSeries.setName(category);
+                barChartDataList.add(barChartSeries);
             }
-        } else {  // Nach Ort
-            for (Task task : tasks) {                                                                                // Map erstellen, von der Kategorie mit der dazugehörigen Zeit
+        }
+
+        // Nach Ort analysieren
+        if (cbFilter.getSelectionModel().getSelectedItem().equals("Location")) {
+            // Map erstellen, die zu jedem Ort die dort aufgewandte Zeit speichert
+            for (Task task : tasksToAnalyse) {
                 if (!mapTaskTime.containsKey(task.getFahrt().getNach().getName())) {
                     mapTaskTime.put(task.getFahrt().getNach().getName(), 0.0);
                 }
                 mapTaskTime.put(task.getFahrt().getNach().getName(), mapTaskTime.get(task.getFahrt().getNach().getName()) + task.getTime() / 60.0);
-                zeitInsgesamt += task.getTime() / 60;
+                zeitInsgesamt += task.getTime() / 60.0;
             }
 
             for (String location : mapTaskTime.keySet()) {
-                series = new XYChart.Series();
-                listPie.add(new PieChart.Data(location, Math.round((mapTaskTime.get(location) / zeitInsgesamt) * 100)));     //Pie Chart mit Prozent Werten füllen
-                series.getData().add(new XYChart.Data(location, Math.round(mapTaskTime.get(location))));                      //Bar Chart Serien erstellen 
-                series.setName(location);
-                serien.add(series);
+                barChartSeries = new XYChart.Series();
+                // PieChart mit Prozentwerten füllen
+                pieChartDataList.add(new PieChart.Data(location, Math.round((mapTaskTime.get(location) / zeitInsgesamt) * 100)));
+                // BarChart Series erstellen
+                XYChart.Data data = new XYChart.Data(location, Math.round(mapTaskTime.get(location)));
+                barChartSeries.getData().add(data);
+                barChartSeries.setName(location);
+                barChartDataList.add(barChartSeries);
             }
         }
 
-        ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(listPie);
+        ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(pieChartDataList);
+        pieChart.getData().clear();
         pieChart.setData(pieChartData);
-        pieChart.setLegendSide(Side.BOTTOM);
-        serien.stream().forEach(s -> barChart.getData().addAll(s));
 
-    }    
+        // MouseClickListener für Prozentdarstellung auf PieChart
+        for (final PieChart.Data data : pieChart.getData()) {
+            data.getNode().addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent e) {
+                    caption.setText(String.format("%.2f %% in %s" , data.getPieValue(), data.getName()));
+                }
+            });
+        }
+
+
+        barChart.getData().addAll(barChartDataList);
+
+        // BarChart Clicklistener
+        for (Series<String, Number> barChartSery : barChartDataList) {
+            for (XYChart.Data<String, Number> data : barChartSery.getData()) {
+                data.getNode().addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent e) {
+                        caption.setText(String.format("%.2f h in %s", data.getYValue(), data.getXValue()));
+                    }
+                });
+            }
+        }
+    }
+    
+    @FXML
+    private void handleSaveAnalysisClicked(ActionEvent event) {
+        printTaskEvaluationByCategoriesToFile(dateVonAnalyse.getValue(), dateBisAnalyse.getValue());
+    }
+
+    public void printTaskEvaluationByCategoriesToFile(LocalDate from, LocalDate to) {
+        FileChooser chooser = new FileChooser();
+        chooser.setInitialDirectory(Paths.get(Setup.getDatabaseURL()).getParent().toFile());
+        chooser.setInitialFileName("Task_Overview_" + from.format(dtfFile) + "_" + to.format(dtfFile) + ".txt");
+        chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter(".txt", ".txt"));
+        chooser.setTitle("Speichern unter...");
+
+        File f = chooser.showSaveDialog(mainApp.getStage());
+        if (f != null && !f.exists()) {
+            try {
+                f.createNewFile();
+            } catch (IOException ex) {
+                Notifier.INSTANCE.notifyError("Fehler beim erzeugen der Datei!", ex.getMessage());
+            }
+        }
+
+        if (f != null) {
+            try (PrintWriter pw = new PrintWriter(f)) {
+                pw.println("Auswertung von " + from.format(dtfStandard) + " bis " + to.format(dtfStandard));
+
+                // Gesamstunden ausrechnen
+                double sum = tasks.stream()
+                        .filter(t -> MMTUtil.isDateBetweenInclusive(t.getBeginning().toLocalDate(), from, to))
+                        .mapToDouble(t -> t.getTime() / 60.0)
+                        .sum();
+                double onePercent = sum / 100;
+
+                // Gruppieren nach Stunden
+                TreeMap<String, Long> map = tasks.stream()
+                        .filter(t -> MMTUtil.isDateBetweenInclusive(t.getBeginning().toLocalDate(), from, to))
+                        .collect(Collectors.groupingBy(t -> t.getCategory(), TreeMap::new, Collectors.summingLong(t -> t.getTime())));
+
+                // Gruppieren nach Stunden in %
+                TreeMap<String, Double> map2 = tasks.stream()
+                        .filter(t -> MMTUtil.isDateBetweenInclusive(t.getBeginning().toLocalDate(), from, to))
+                        .collect(Collectors.groupingBy(t -> t.getCategory(), TreeMap::new, Collectors.summingDouble(t -> (t.getTime() / 60.0) / onePercent)));
+
+                // In Datei schreiben
+                pw.println("Gesamtaufwand in Stunden: " + String.format("%.2f", sum));
+                pw.println();
+                pw.println("Auswertung des Aufwands (in h):");
+                map.forEach((category, time) -> pw.println(category + ": " + String.format("%.2f", time / 60.0)));
+                pw.println();
+                pw.println("Auswertung des Aufwands (in %):");
+                map2.forEach((category, percent) -> pw.println(category + ": " + String.format("%.2f", percent)));
+                pw.flush();
+
+                Notifier.INSTANCE.notifySuccess("Erfolg!", "Auswertung erfolgreich unter '" + f.getAbsolutePath() + "' gespeichert!");
+            } catch (FileNotFoundException fnfe) {
+                Notifier.INSTANCE.notifyError("Fehler beim speichern!", fnfe.getMessage());
+            }
+        }
+    }
+
+    @FXML
+    private void onQuitClicked(ActionEvent event) throws Exception {
+        this.mainApp.stop();
+    }
+
+    @FXML
+    private void onEditTaskClicked(ActionEvent event) {
+        selectedTask = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
+        setDetailView(2);
+    }
+
+    @FXML
+    private void onFinalizeTaskClicked(ActionEvent event) {
+        if (!lvAusstehendeTasks.getItems().isEmpty()) {
+            Task t = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
+            t.finalizeTask();
+            try {
+                dao.updateTask(t);
+                tasks.set(tasks.indexOf(t), t);
+                initFinalizing();
+                Notifier.INSTANCE.notifySuccess("Erfolg!", "Task wurde finalisiert!");
+            } catch (MMTDBException ex) {
+                Notifier.INSTANCE.notifyError("Fehler!", "Task wurde nicht finalisiert!");
+            }
+        } else {
+            Notifier.INSTANCE.notifyError("Fehler!", "Es sind keine Tasks zu finalisieren!");
+        }
+    }
+
+    @FXML
+    private void onBackClicked(ActionEvent event) {
+        tabPane.getSelectionModel().select(fromTab);
+    }
 }

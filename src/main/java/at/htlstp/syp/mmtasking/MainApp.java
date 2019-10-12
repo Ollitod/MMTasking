@@ -11,19 +11,22 @@ import eu.hansolo.enzo.notification.Notification.Notifier;
 import java.util.Arrays;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 /**
  *
  * @author Oliver Tod / 4BHIF
  */
 public class MainApp extends Application {
-    
+
     private MainAppController controller;
     private Stage stage;
 
@@ -33,9 +36,11 @@ public class MainApp extends Application {
         Parent root = loader.load();
         controller = loader.getController();
         controller.setMainApplication(this);
-        
+
         // Notifications konfigurieren
-        Notifier.setPopupLocation(null, Pos.TOP_LEFT);
+        Notifier.setPopupLocation(null, Pos.TOP_RIGHT);
+        Notifier.setWidth(600);
+        Notifier.INSTANCE.setPopupLifetime(Duration.seconds(5));
         Notifier.setNotificationOwner(stage);
 
         Scene scene = new Scene(root);
@@ -46,6 +51,7 @@ public class MainApp extends Application {
         stage.getIcons().add(new Image(MainApp.class.getResourceAsStream("/favicon.png")));
         stage.setResizable(false);
         stage.show();
+        Notifier.INSTANCE.notifyInfo("Hinweis!", "Du hast heute " + controller.getNumberOfTasksToday() + " bevorstehende Tasks!");
     }
 
     /**
@@ -62,9 +68,8 @@ public class MainApp extends Application {
         controller.getClock().stop();
         controller.getDate().stop();
         JPAUtil.close();
-//        controller.getAutologout().stop();
     }
-    
+
     public Stage getStage() {
         return stage;
     }

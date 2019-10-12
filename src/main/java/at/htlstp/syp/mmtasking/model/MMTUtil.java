@@ -6,7 +6,7 @@
 
 package at.htlstp.syp.mmtasking.model;
 
-import at.htlstp.syp.mmtasking.db.JPAUtil;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -40,5 +40,9 @@ public class MMTUtil {
 
     public static DateTimeFormatter getDTF() {
         return FORMATTER;
+    }
+    
+    public static boolean isDateBetweenInclusive(LocalDate date, LocalDate from, LocalDate to) {
+        return date.compareTo(from) >= 0 && date.compareTo(to) <= 0;
     }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXCheckBox?>
 <?import com.jfoenix.controls.JFXDatePicker?>
 <?import com.jfoenix.controls.JFXListView?>
@@ -7,11 +8,11 @@
 <?import com.jfoenix.controls.JFXTextField?>
 <?import com.jfoenix.controls.JFXTimePicker?>
 <?import com.jfoenix.controls.JFXToggleButton?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.PieChart?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
@@ -22,384 +23,473 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="600.0" prefWidth="908.0" xmlns="http://javafx.com/javafx/8.0.221" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.htlstp.syp.mmtasking.controller.MainAppController">
-  <children>
-    <MenuBar VBox.vgrow="NEVER">
-      <menus>
-        <Menu mnemonicParsing="false" text="File">
-          <items>
-            <MenuItem mnemonicParsing="false" text="New" />
-            <MenuItem mnemonicParsing="false" text="Open…" />
-            <Menu mnemonicParsing="false" text="Open Recent" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Close" />
-            <MenuItem mnemonicParsing="false" text="Save" />
-            <MenuItem mnemonicParsing="false" text="Save As…" />
-            <MenuItem mnemonicParsing="false" text="Revert" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Preferences…" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Quit" />
-          </items>
-        </Menu>
-        <Menu mnemonicParsing="false" text="Edit">
-          <items>
-            <MenuItem mnemonicParsing="false" text="Undo" />
-            <MenuItem mnemonicParsing="false" text="Redo" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Cut" />
-            <MenuItem mnemonicParsing="false" text="Copy" />
-            <MenuItem mnemonicParsing="false" text="Paste" />
-            <MenuItem mnemonicParsing="false" text="Delete" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Select All" />
-            <MenuItem mnemonicParsing="false" text="Unselect All" />
-          </items>
-        </Menu>
-        <Menu mnemonicParsing="false" text="Help">
-          <items>
-            <MenuItem mnemonicParsing="false" onAction="#helpClicked" text="About MMTasking" />
-          </items>
-        </Menu>
-            <Menu mnemonicParsing="false" text="Manage">
-              <items>
-                <MenuItem fx:id="menuTask" mnemonicParsing="false" onAction="#openTaskDialog" text="Task hinzufügen" />
-                  <MenuItem fx:id="menuApp" mnemonicParsing="false" onAction="#openAppDialog" text="Termin hinzufügen" />
-              </items>
-            </Menu>
-      </menus>
-    </MenuBar>
-      <AnchorPane prefHeight="116.0" prefWidth="900.0">
-         <children>
-            <Label fx:id="lblCurrentUser" alignment="CENTER_RIGHT" layoutX="557.0" layoutY="13.0" prefHeight="17.0" prefWidth="312.0" text="Logged in User: default" textAlignment="JUSTIFY" />
-            <Label fx:id="lblAutoLogout" layoutX="22.0" layoutY="11.0" prefHeight="17.0" prefWidth="147.0" text="Auto Logout: 00:14:59" />
-            <ImageView fitHeight="25.0" fitWidth="35.0" layoutX="851.0" layoutY="9.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@../../../../../../resources/logouticon.png" />
-               </image>
-            </ImageView>
-         </children>
-      </AnchorPane>
-      <TabPane fx:id="tabPane" prefHeight="604.0" prefWidth="900.0" tabClosingPolicy="UNAVAILABLE">
-        <tabs>
-          <Tab text="Startseite">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="497.0" prefWidth="900.0">
-                     <children>
-                        <Label layoutX="25.0" layoutY="14.0" prefHeight="31.0" prefWidth="626.0" text="Tasks für die kommende Woche">
-                           <font>
-                              <Font size="26.0" />
-                           </font>
-                        </Label>
-                        <ListView fx:id="lvTaskM" layoutX="26.0" layoutY="109.0" prefHeight="199.0" prefWidth="650.0" />
-                        <Label fx:id="lblTime" layoutX="713.0" layoutY="215.0" prefHeight="64.0" prefWidth="175.0" text="23:59:59">
-                           <font>
-                              <Font name="System Bold" size="38.0" />
-                           </font>
-                        </Label>
-                        <Label layoutX="25.0" layoutY="344.0" prefHeight="31.0" prefWidth="626.0" text="Termine für die kommende Woche">
-                           <font>
-                              <Font size="26.0" />
-                           </font>
-                        </Label>
-                        <ListView fx:id="lvTerminM" layoutX="27.0" layoutY="387.0" prefHeight="101.0" prefWidth="650.0" />
-                        <Label fx:id="lblDate" layoutX="722.0" layoutY="269.0" prefHeight="18.0" prefWidth="147.0" text="Mittwoch, 31.12.2019">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Label>
-                        <GridPane layoutX="27.0" layoutY="84.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="650.0">
-                           <columnConstraints>
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                           </columnConstraints>
-                           <rowConstraints>
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                           </rowConstraints>
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.221" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.htlstp.syp.mmtasking.controller.MainAppController">
+   <children>
+      <VBox maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="700.0" prefWidth="900.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <children>
+          <MenuBar maxWidth="-Infinity" prefWidth="910.0" VBox.vgrow="NEVER">
+            <menus>
+              <Menu mnemonicParsing="false" text="File">
+                <items>
+                  <MenuItem mnemonicParsing="false" text="New" />
+                  <MenuItem mnemonicParsing="false" text="Open…" />
+                  <Menu mnemonicParsing="false" text="Open Recent" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="Close" />
+                  <MenuItem mnemonicParsing="false" text="Save" />
+                  <MenuItem mnemonicParsing="false" text="Save As…" />
+                  <MenuItem mnemonicParsing="false" text="Revert" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="Preferences…" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" onAction="#onQuitClicked" text="Quit" />
+                </items>
+              </Menu>
+              <Menu mnemonicParsing="false" text="Edit">
+                <items>
+                  <MenuItem mnemonicParsing="false" text="Undo" />
+                  <MenuItem mnemonicParsing="false" text="Redo" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="Cut" />
+                  <MenuItem mnemonicParsing="false" text="Copy" />
+                  <MenuItem mnemonicParsing="false" text="Paste" />
+                  <MenuItem mnemonicParsing="false" text="Delete" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="Select All" />
+                  <MenuItem mnemonicParsing="false" text="Unselect All" />
+                </items>
+              </Menu>
+              <Menu mnemonicParsing="false" text="Help">
+                <items>
+                  <MenuItem mnemonicParsing="false" onAction="#helpClicked" text="About MMTasking" />
+                </items>
+              </Menu>
+                  <Menu mnemonicParsing="false" text="Manage">
+                    <items>
+                      <MenuItem fx:id="menuTask" mnemonicParsing="false" onAction="#openTaskDialog" text="Task hinzufügen" />
+                    </items>
+                  </Menu>
+            </menus>
+          </MenuBar>
+            <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="60.0" prefWidth="910.0" style="-fx-background-color: black;">
+               <children>
+                  <Label layoutX="377.0" layoutY="12.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="MMT" textFill="#ff3333" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <font>
+                        <Font size="30.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="447.0" layoutY="12.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" text="asking" textFill="WHITE" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <font>
+                        <Font size="30.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="lblDate" alignment="CENTER" layoutX="14.0" layoutY="19.0" text="Wochentag, dd.mm.yyyy" textFill="WHITE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="0.0">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="lblTime" layoutX="753.0" layoutY="2.0" maxHeight="-Infinity" maxWidth="-Infinity" text="hh:mm:ss" textFill="WHITE" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="0.0">
+                     <font>
+                        <Font name="System Bold" size="38.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+            <TabPane fx:id="tabPane" maxWidth="-Infinity" prefHeight="625.0" prefWidth="910.0" tabClosingPolicy="UNAVAILABLE">
+              <tabs>
+                <Tab text="Startseite">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="497.0" prefWidth="900.0">
                            <children>
-                              <Label text="Titel" GridPane.halignment="LEFT">
+                              <Label layoutX="25.0" layoutY="14.0" prefHeight="38.0" prefWidth="648.0" text="Taskübersicht" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="25.0">
                                  <font>
-                                    <Font name="System Bold" size="14.0" />
+                                    <Font size="26.0" />
                                  </font>
                               </Label>
-                              <Label text="Zeitraum" GridPane.columnIndex="2" GridPane.halignment="LEFT">
+                              <ListView fx:id="lvTaskM" layoutX="25.0" layoutY="133.0" prefHeight="199.0" prefWidth="850.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="150.0" />
+                              <GridPane layoutX="27.0" layoutY="84.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="850.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="120.0">
+                                 <columnConstraints>
+                                    <ColumnConstraints fillWidth="false" halignment="LEFT" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="10.0" prefWidth="190.0" />
+                                    <ColumnConstraints fillWidth="false" halignment="LEFT" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="10.0" prefWidth="200.0" />
+                                    <ColumnConstraints fillWidth="false" halignment="LEFT" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="10.0" prefWidth="188.0" />
+                                    <ColumnConstraints fillWidth="false" halignment="LEFT" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="10.0" prefWidth="175.0" />
+                                    <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="10.0" prefWidth="75.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                                 <children>
+                                    <Label text="Titel" GridPane.halignment="LEFT">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets left="12.0" />
+                                       </padding>
+                                    </Label>
+                                    <Label text="Zeitraum" GridPane.columnIndex="2" GridPane.halignment="LEFT">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets left="12.0" />
+                                       </padding>
+                                    </Label>
+                                    <Label text="Ort" GridPane.columnIndex="3" GridPane.halignment="LEFT">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets left="12.0" />
+                                       </padding>
+                                    </Label>
+                                    <Label text="Kategorie" GridPane.columnIndex="1" GridPane.halignment="LEFT">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets left="12.0" />
+                                       </padding>
+                                    </Label>
+                                    <Label alignment="CENTER" text="Status" GridPane.columnIndex="4" GridPane.halignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets right="10.0" />
+                                       </padding>
+                                    </Label>
+                                 </children>
+                              </GridPane>
+                              <Label layoutX="25.0" layoutY="75.0" text="Ansicht:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="75.0">
                                  <font>
-                                    <Font name="System Bold" size="14.0" />
+                                    <Font size="15.0" />
                                  </font>
                               </Label>
-                              <Label text="Ort" GridPane.columnIndex="3" GridPane.halignment="LEFT">
-                                 <font>
-                                    <Font name="System Bold" size="14.0" />
-                                 </font>
-                              </Label>
-                              <Label text="Kategorie" GridPane.columnIndex="1" GridPane.halignment="LEFT">
-                                 <font>
-                                    <Font name="System Bold" size="14.0" />
-                                 </font>
-                              </Label>
+                              <ChoiceBox fx:id="cbViewMode" layoutX="92.0" layoutY="73.0" prefWidth="180.0" AnchorPane.leftAnchor="90.0" AnchorPane.topAnchor="75.0" />
                            </children>
-                        </GridPane>
-                     </children>
-                  </AnchorPane>
-            </content>
-          </Tab>
-          <Tab text="Detailansicht">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <Label layoutX="32.0" layoutY="30.0" prefHeight="31.0" prefWidth="626.0" text="Detailansicht">
-                           <font>
-                              <Font size="26.0" />
-                           </font>
-                        </Label>
-                        <JFXTextField fx:id="tfTaskD" layoutX="32.0" layoutY="92.0" prefHeight="27.0" prefWidth="271.0" promptText="task " />
-                        <JFXDatePicker fx:id="dateVonD" defaultColor="BLACK" layoutX="101.0" layoutY="149.0" prefHeight="29.0" prefWidth="172.0" promptText="begin" />
-                        <Label layoutX="46.0" layoutY="153.0" text="Beginn">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <Label layoutX="346.0" layoutY="155.0" text="um">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <JFXTimePicker fx:id="timeVonD" defaultColor="BLACK" layoutX="378.0" layoutY="149.0" prefHeight="29.0" prefWidth="176.0" promptText="time" />
-                        <JFXDatePicker fx:id="dateBisD" defaultColor="BLACK" layoutX="101.0" layoutY="189.0" prefHeight="29.0" prefWidth="172.0" promptText="ende" />
-                        <Label layoutX="48.0" layoutY="192.0" text="Ende">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <Label layoutX="346.0" layoutY="194.0" text="um">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <JFXTimePicker fx:id="timeBisD" defaultColor="BLACK" layoutX="378.0" layoutY="189.0" prefHeight="29.0" prefWidth="176.0" promptText="time" />
-                        <Label layoutX="46.0" layoutY="232.0" text="Ort">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <JFXTextArea fx:id="taCommentD" layoutX="297.0" layoutY="307.0" prefHeight="142.0" prefWidth="324.0" promptText="comment" />
-                        <Label fx:id="lblFahrzeit" layoutX="344.0" layoutY="232.0" prefHeight="19.0" prefWidth="230.0" text="Die Fahrzeit beträgt: xxhxxm">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <JFXCheckBox fx:id="cbHoch" checkedColor="#ff0101" layoutX="48.0" layoutY="348.0" text="Hoch" textFill="#ff0101" unCheckedColor="#ff0101" />
-                        <JFXCheckBox fx:id="cbMittel" checkedColor="#ffa100" layoutX="120.0" layoutY="345.0" prefHeight="25.0" prefWidth="58.0" text="Mittel" textFill="#ffa100" unCheckedColor="#ffa100" />
-                        <JFXCheckBox fx:id="cbNiedrig" checkedColor="#0dd04b" layoutX="198.0" layoutY="349.0" text="Niedrig" textFill="#0dd04b" unCheckedColor="#0dd04b" />
-                        <Label layoutX="48.0" layoutY="313.0" text="Die Priorität ist:">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <Label layoutX="315.0" layoutY="96.0" text="in">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <Label layoutX="48.0" layoutY="386.0" text="Dieser Task ist:">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <Separator layoutX="46.0" layoutY="301.0" prefHeight="0.0" prefWidth="571.0" />
-                        <JFXCheckBox fx:id="cbDeleteableD" checkedColor="BLACK" layoutX="48.0" layoutY="416.0" text="Löschbar" unCheckedColor="BLACK" />
-                        <Separator layoutX="30.0" layoutY="83.0" prefHeight="0.0" prefWidth="587.0" />
-                        <Button layoutX="44.0" layoutY="465.0" mnemonicParsing="false" onAction="#handleUebernehmen" prefHeight="25.0" prefWidth="579.0" text="Übernehmen" />
-                        <ChoiceBox fx:id="cbCategoryD" layoutX="357.0" layoutY="92.0" prefHeight="27.0" prefWidth="195.0" />
-                        <ChoiceBox fx:id="cbLocs" layoutX="97.0" layoutY="228.0" prefHeight="27.0" prefWidth="167.0" />
-                     </children></AnchorPane>
-            </content>
-          </Tab>
-            <Tab text="Finalisierung">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <Label layoutX="32.0" layoutY="30.0" prefHeight="38.0" prefWidth="674.0" text="Finalisierung">
-                           <font>
-                              <Font size="26.0" />
-                           </font>
-                        </Label>
-                        <JFXListView fx:id="lvAusstehendeTasks" layoutX="32.0" layoutY="152.0" prefHeight="214.0" prefWidth="675.0" />
-                        <Label layoutX="32.0" layoutY="83.0" text="Ausstehende Tasks:">
-                           <font>
-                              <Font size="16.0" />
-                           </font>
-                        </Label>
-                        <JFXTextArea disable="true" editable="false" layoutX="32.0" layoutY="417.0" prefHeight="51.0" prefWidth="677.0" text="Info: Hier werden Projekte angezeigt, die in der Vergangenheit liegen. Um die echtheit der Daten zu garantieren, sollten vergangene Tätigkeiten abgesegnet werden. Notwendig bei änderung der Soll - Daten.&#10;" />
-                        <Button fx:id="btnEdit" layoutX="557.0" layoutY="378.0" mnemonicParsing="false" text="Editieren" />
-                        <Button fx:id="btnFinalize" layoutX="631.0" layoutY="378.0" mnemonicParsing="false" text="Finalisieren" />
-                        <GridPane layoutX="32.0" layoutY="127.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="675.0">
-                           <columnConstraints>
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                           </columnConstraints>
-                           <rowConstraints>
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                           </rowConstraints>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+                <Tab text="Detailansicht">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                              <Label text="Titel" GridPane.halignment="LEFT">
+                              <Label layoutX="32.0" layoutY="30.0" prefHeight="31.0" prefWidth="626.0" text="Detailansicht" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="25.0">
                                  <font>
-                                    <Font name="System Bold" size="14.0" />
+                                    <Font size="26.0" />
                                  </font>
                               </Label>
-                              <Label text="Zeitraum" GridPane.columnIndex="2" GridPane.halignment="LEFT">
+                              <JFXTextField fx:id="tfTaskD" focusColor="#04baf1" layoutX="85.0" layoutY="98.0" prefHeight="27.0" prefWidth="271.0" promptText="Titel" AnchorPane.leftAnchor="130.0" AnchorPane.rightAnchor="300.0" />
+                              <JFXDatePicker fx:id="dateVonD" defaultColor="#04baf1" layoutX="101.0" layoutY="183.0" prefHeight="29.0" prefWidth="172.0" promptText="dd.mm.yyyy" AnchorPane.leftAnchor="130.0" AnchorPane.rightAnchor="580.0" />
+                              <Label layoutX="37.0" layoutY="187.0" text="Beginn" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="795.0">
                                  <font>
-                                    <Font name="System Bold" size="14.0" />
+                                    <Font size="15.0" />
                                  </font>
                               </Label>
-                              <Label text="Ort" GridPane.columnIndex="3" GridPane.halignment="LEFT">
+                              <Label layoutX="346.0" layoutY="189.0" text="um" AnchorPane.leftAnchor="400.0">
                                  <font>
-                                    <Font name="System Bold" size="14.0" />
+                                    <Font size="15.0" />
                                  </font>
                               </Label>
-                              <Label text="Kategorie" GridPane.columnIndex="1" GridPane.halignment="LEFT">
+                              <JFXTimePicker fx:id="timeVonD" defaultColor="#04baf1" layoutX="378.0" layoutY="183.0" prefHeight="29.0" prefWidth="176.0" promptText="hh:mm" AnchorPane.leftAnchor="430.0" AnchorPane.rightAnchor="300.0" />
+                              <JFXDatePicker fx:id="dateBisD" defaultColor="#04baf1" layoutX="101.0" layoutY="223.0" prefHeight="29.0" prefWidth="172.0" promptText="dd.mm.yyyy" AnchorPane.leftAnchor="130.0" AnchorPane.rightAnchor="580.0" />
+                              <Label layoutX="50.0" layoutY="226.0" text="Ende" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="795.0">
                                  <font>
-                                    <Font name="System Bold" size="14.0" />
+                                    <Font size="15.0" />
                                  </font>
                               </Label>
+                              <Label layoutX="346.0" layoutY="228.0" text="um" AnchorPane.leftAnchor="400.0">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <JFXTimePicker fx:id="timeBisD" defaultColor="#04baf1" layoutX="378.0" layoutY="223.0" prefHeight="29.0" prefWidth="176.0" promptText="hh:mm" AnchorPane.leftAnchor="430.0" AnchorPane.rightAnchor="300.0" />
+                              <Label layoutX="61.0" layoutY="266.0" text="Ort" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="795.0">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <JFXTextArea fx:id="taCommentD" focusColor="#04baf1" layoutX="297.0" layoutY="337.0" prefHeight="112.0" prefWidth="324.0" promptText="Anmerkung zu diesem Task" AnchorPane.leftAnchor="400.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="365.0" />
+                              <Label layoutX="344.0" layoutY="266.0" prefHeight="21.0" text="Die Fahrzeit beträgt:" AnchorPane.leftAnchor="400.0">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <FlowPane hgap="48.0" layoutX="35.0" layoutY="354.0" prefHeight="25.0" prefWidth="285.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="580.0" AnchorPane.topAnchor="365.0">
+                                 <children>
+                                    <JFXCheckBox fx:id="cbHoch" checkedColor="#ff0101" text="Hoch" textFill="#ff0101" unCheckedColor="#ff0101" />
+                                    <JFXCheckBox fx:id="cbMittel" checkedColor="#ffa100" prefHeight="25.0" prefWidth="58.0" text="Mittel" textFill="#ffa100" unCheckedColor="#ffa100" />
+                                    <JFXCheckBox fx:id="cbNiedrig" checkedColor="#0dd04b" text="Niedrig" textFill="#0dd04b" unCheckedColor="#0dd04b" />
+                                 </children>
+                              </FlowPane>
+                              <Label layoutX="48.0" layoutY="313.0" text="Priorität" AnchorPane.leftAnchor="35.0" AnchorPane.topAnchor="340.0">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutX="22.0" layoutY="145.0" text="Kategorie" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="795.0">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutX="48.0" layoutY="386.0" text="Löschbar" AnchorPane.leftAnchor="35.0" AnchorPane.topAnchor="410.0">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <Separator layoutX="46.0" layoutY="301.0" prefHeight="0.0" prefWidth="571.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="275.0" AnchorPane.topAnchor="325.0" />
+                              <JFXCheckBox fx:id="cbDeleteableD" checkedColor="BLACK" layoutX="29.0" layoutY="407.0" text="Ja" unCheckedColor="BLACK" AnchorPane.leftAnchor="35.0" AnchorPane.topAnchor="445.0" />
+                              <Separator layoutX="30.0" layoutY="83.0" prefHeight="0.0" prefWidth="587.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="275.0" />
+                              <ChoiceBox fx:id="cbCategoryD" layoutX="110.0" layoutY="142.0" prefHeight="27.0" prefWidth="195.0" AnchorPane.leftAnchor="130.0" AnchorPane.rightAnchor="580.0" />
+                              <ChoiceBox fx:id="cbLocs" layoutX="97.0" layoutY="262.0" prefHeight="27.0" prefWidth="167.0" AnchorPane.leftAnchor="130.0" AnchorPane.rightAnchor="580.0" />
+                              <Label layoutX="34.0" layoutY="101.0" text="Titel" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="795.0">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutX="295.0" layoutY="313.0" text="Notiz" AnchorPane.leftAnchor="400.0" AnchorPane.topAnchor="340.0">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="lblFahrzeit" layoutX="501.0" layoutY="266.0" text="mm min" AnchorPane.leftAnchor="540.0">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <JFXButton layoutX="34.0" layoutY="462.0" onAction="#handleUebernehmen" prefHeight="30.0" prefWidth="573.0" ripplerFill="#5d5d5d" style="-fx-background-color: #04baf1;" text="Übernehmen" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="300.0" />
+                              <JFXButton fx:id="btnBack" layoutX="36.0" layoutY="491.0" onAction="#onBackClicked" prefHeight="30.0" ripplerFill="#5d5d5d" style="-fx-background-color: ff3333;" text="Zurück" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="500.0" />
                            </children>
-                        </GridPane>
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-            <Tab text="Analyse">
-			  <content>
-				<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-					 <children>
-						<BarChart fx:id="barChart" barGap="0.0" categoryGap="2.0" layoutX="14.0" layoutY="201.0" prefHeight="264.0" prefWidth="413.0">
-						  <xAxis>
-							<CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" />
-						  </xAxis>
-						  <yAxis>
-							<NumberAxis side="LEFT" />
-						  </yAxis>
-						</BarChart>
-						<Label layoutX="34.0" layoutY="25.0" text="Analyse">
-						   <font>
-							  <Font size="26.0" />
-						   </font>
-						</Label>
-						<Label layoutX="50.0" layoutY="287.0">
-						   <font>
-							  <Font size="15.0" />
-						   </font>
-						</Label>
-						<Label layoutX="35.0" layoutY="76.0" text="Zeitraum">
-						   <font>
-							  <Font size="20.0" />
-						   </font>
-						</Label>
-						<JFXDatePicker fx:id="dateVonAnalyse" defaultColor="#000000ba" layoutX="34.0" layoutY="122.0" prefHeight="25.0" prefWidth="138.0" />
-						<JFXDatePicker fx:id="dateBisAnalyse" defaultColor="BLACK" layoutX="213.0" layoutY="121.0" prefHeight="25.0" prefWidth="138.0" />
-						<Label layoutX="178.0" layoutY="134.0" text="bis">
-						   <font>
-							  <Font size="14.0" />
-						   </font>
-						</Label>
-						<Separator layoutX="36.0" layoutY="103.0" prefHeight="6.0" prefWidth="334.0" />
-						<Label layoutX="432.0" layoutY="74.0" text="Filter">
-						   <font>
-							  <Font size="20.0" />
-						   </font>
-						</Label>
-						<Separator layoutX="434.0" layoutY="100.0" prefHeight="6.0" prefWidth="334.0" />
-						<ChoiceBox fx:id="cbFilter" layoutX="433.0" layoutY="122.0" prefWidth="150.0" />
-						<PieChart fx:id="pieChart" labelsVisible="false" layoutX="427.0" layoutY="199.0" prefHeight="266.0" prefWidth="434.0" />
-					 </children>
-				 </AnchorPane>
-			  </content>
-			</Tab>
-            <Tab text="Einstellungen">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <Label layoutX="41.0" layoutY="31.0" text="Einstellungen">
-                           <font>
-                              <Font size="26.0" />
-                           </font>
-                        </Label>
-                        <Label layoutX="44.0" layoutY="129.0" prefHeight="25.0" prefWidth="199.0" text="Kontrolliertes Löschen:">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <JFXToggleButton disable="true" layoutX="244.0" layoutY="110.0" selected="true" text="Dektiviert" />
-                        <Label layoutX="45.0" layoutY="170.0" prefHeight="25.0" prefWidth="189.0" text="Automatisches Löschen:">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <JFXToggleButton disable="true" layoutX="245.0" layoutY="153.0" selected="true" text="Dektiviert" />
-                        <Separator layoutX="38.0" layoutY="110.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Separator layoutX="40.0" layoutY="205.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Label layoutX="43.0" layoutY="87.0" text="Löschen">
-                           <font>
-                              <Font size="20.0" />
-                           </font>
-                        </Label>
-                        <Label layoutX="40.0" layoutY="241.0" text="Benachrichtigungen">
-                           <font>
-                              <Font size="20.0" />
-                           </font>
-                        </Label>
-                        <Separator layoutX="40.0" layoutY="263.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Separator layoutX="37.0" layoutY="358.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Label layoutX="425.0" layoutY="239.0" text="Speichern">
-                           <font>
-                              <Font size="20.0" />
-                           </font>
-                        </Label>
-                        <Separator layoutX="425.0" layoutY="261.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Separator layoutX="422.0" layoutY="358.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Label layoutX="427.0" layoutY="86.0" text="Task hinzufügen">
-                           <font>
-                              <Font size="20.0" />
-                           </font>
-                        </Label>
-                        <Separator layoutX="427.0" layoutY="110.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Separator layoutX="423.0" layoutY="204.0" prefHeight="15.0" prefWidth="348.0" />
-                        <Label layoutX="427.0" layoutY="128.0" prefHeight="25.0" prefWidth="199.0" text="Bevorzugter Standort:">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <Label layoutX="427.0" layoutY="167.0" prefHeight="25.0" prefWidth="199.0" text="Fahrzeit automatisch:">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <JFXToggleButton layoutX="610.0" layoutY="153.0" text="Dektiviert" />
-                        <Label layoutX="42.0" layoutY="282.0" prefHeight="25.0" prefWidth="199.0" text="Finalisierungserinnerung">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                        </Label>
-                        <ChoiceBox layoutX="238.0" layoutY="282.0" prefHeight="27.0" prefWidth="147.0" />
-                        <ChoiceBox fx:id="chbPrefLoc" layoutX="610.0" layoutY="128.0" prefHeight="27.0" prefWidth="147.0" />
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
-        </tabs>
-      </TabPane>
-  </children>
-</VBox>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+                  <Tab text="Finalisierung">
+                     <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <Label layoutX="32.0" layoutY="30.0" prefHeight="38.0" prefWidth="674.0" text="Finalisierung" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="25.0">
+                                 <font>
+                                    <Font size="26.0" />
+                                 </font>
+                              </Label>
+                              <JFXListView fx:id="lvAusstehendeTasks" layoutX="32.0" layoutY="152.0" prefHeight="214.0" prefWidth="675.0" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="150.0" />
+                              <Label layoutX="32.0" layoutY="83.0" text="Ausstehende Tasks:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="75.0">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <FlowPane alignment="TOP_RIGHT" hgap="10.0" layoutX="488.0" layoutY="370.0" prefHeight="25.0" prefWidth="671.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0">
+                                 <children>
+                                    <JFXButton onAction="#onEditTaskClicked" prefHeight="37.0" prefWidth="100.0" ripplerFill="#5d5d5d" style="-fx-background-color: #04baf1;" text="Editieren" />
+                                    <JFXButton onAction="#onFinalizeTaskClicked" prefHeight="37.0" prefWidth="100.0" ripplerFill="#5d5d5d" style="-fx-background-color: #04baf1;" text="Finalisieren" />
+                                 </children>
+                              </FlowPane>
+                              <GridPane layoutX="-246.0" layoutY="123.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="850.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="120.0">
+                                 <columnConstraints>
+                                    <ColumnConstraints fillWidth="false" halignment="LEFT" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="10.0" prefWidth="190.0" />
+                                    <ColumnConstraints fillWidth="false" halignment="LEFT" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="10.0" prefWidth="200.0" />
+                                    <ColumnConstraints fillWidth="false" halignment="LEFT" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="10.0" prefWidth="188.0" />
+                                    <ColumnConstraints fillWidth="false" halignment="LEFT" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="10.0" prefWidth="175.0" />
+                                    <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="10.0" prefWidth="75.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                                 <children>
+                                    <Label text="Titel" GridPane.halignment="LEFT">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets left="12.0" />
+                                       </padding>
+                                    </Label>
+                                    <Label text="Zeitraum" GridPane.columnIndex="2" GridPane.halignment="LEFT">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets left="12.0" />
+                                       </padding>
+                                    </Label>
+                                    <Label text="Ort" GridPane.columnIndex="3" GridPane.halignment="LEFT">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets left="12.0" />
+                                       </padding>
+                                    </Label>
+                                    <Label text="Kategorie" GridPane.columnIndex="1" GridPane.halignment="LEFT">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets left="12.0" />
+                                       </padding>
+                                    </Label>
+                                    <Label text="Status" GridPane.columnIndex="4" GridPane.halignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets right="10.0" />
+                                       </padding>
+                                    </Label>
+                                 </children>
+                              </GridPane>
+                           </children>
+                        </AnchorPane>
+                     </content>
+                  </Tab>
+                  <Tab text="Analyse">
+      			  <content>
+      				<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+      					 <children>
+      						<BarChart fx:id="barChart" barGap="0.0" categoryGap="2.0" layoutX="14.0" layoutY="201.0" prefHeight="264.0" prefWidth="413.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="485.0" AnchorPane.topAnchor="205.0">
+      						  <xAxis>
+      							<CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" />
+      						  </xAxis>
+      						  <yAxis>
+      							<NumberAxis side="LEFT" />
+      						  </yAxis>
+      						</BarChart>
+      						<Label layoutX="34.0" layoutY="25.0" text="Analyse" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="25.0">
+      						   <font>
+      							  <Font size="26.0" />
+      						   </font>
+      						</Label>
+      						<Label layoutX="35.0" layoutY="76.0" text="Zeitraum" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="75.0">
+      						   <font>
+      							  <Font size="20.0" />
+      						   </font>
+      						</Label>
+                              <FlowPane hgap="20.0" layoutX="34.0" layoutY="121.0" prefHeight="25.0" prefWidth="380.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="490.0">
+                                 <children>
+                                    <Label text="Von:" />
+            						<JFXDatePicker fx:id="dateVonAnalyse" defaultColor="#04baf1ba" prefHeight="25.0" prefWidth="138.0" />
+            						<Label text="Bis:">
+            						   <font>
+            							  <Font size="14.0" />
+            						   </font>
+            						</Label>
+            						<JFXDatePicker fx:id="dateBisAnalyse" defaultColor="#04baf1" prefHeight="25.0" prefWidth="138.0" />
+                                 </children>
+                              </FlowPane>
+      						<Separator layoutX="36.0" layoutY="103.0" prefHeight="6.0" prefWidth="334.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="500.0" AnchorPane.topAnchor="105.0" />
+      						<Label layoutX="432.0" layoutY="74.0" text="Filter" AnchorPane.leftAnchor="450.0" AnchorPane.topAnchor="75.0">
+      						   <font>
+      							  <Font size="20.0" />
+      						   </font>
+      						</Label>
+      						<Separator layoutX="434.0" layoutY="100.0" prefHeight="6.0" prefWidth="334.0" AnchorPane.leftAnchor="450.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="105.0" />
+      						<ChoiceBox fx:id="cbFilter" layoutX="433.0" layoutY="122.0" prefWidth="150.0" AnchorPane.leftAnchor="450.0" />
+      						<PieChart fx:id="pieChart" labelsVisible="false" layoutX="427.0" layoutY="199.0" prefHeight="266.0" prefWidth="434.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="450.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="205.0" />
+                              <JFXButton fx:id="btnSaveAnalysis" layoutX="33.0" layoutY="158.0" onAction="#handleSaveAnalysisClicked" prefHeight="44.0" prefWidth="365.0" ripplerFill="#5d5d5d" style="-fx-background-color: #04baf1;" text="Auswertung speichern" AnchorPane.bottomAnchor="395.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="500.0" AnchorPane.topAnchor="160.0">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </JFXButton>
+                              <Separator layoutX="429.0" layoutY="208.0" orientation="VERTICAL" prefHeight="200.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="430.0" AnchorPane.rightAnchor="465.0" AnchorPane.topAnchor="205.0" />
+                              <Label alignment="CENTER" layoutX="51.0" layoutY="495.0" prefHeight="17.0" prefWidth="361.0" text="Analyse in Stunden pro Kategorie/Ort" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="485.0" />
+                              <Label alignment="CENTER" layoutX="486.0" layoutY="506.0" prefHeight="17.0" prefWidth="361.0" text="Analyse in Prozent des Gesamtaufwands" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="450.0" AnchorPane.rightAnchor="25.0" />
+                              <Label fx:id="caption" layoutX="600.0" layoutY="180.0" text="y h/% in x" AnchorPane.bottomAnchor="385.0" AnchorPane.leftAnchor="590.0" AnchorPane.topAnchor="160.0">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutX="450.0" layoutY="180.0" text="Ausgewählter Wert:" AnchorPane.bottomAnchor="385.0" AnchorPane.leftAnchor="450.0" AnchorPane.topAnchor="160.0">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+      					 </children>
+      				 </AnchorPane>
+      			  </content>
+      			</Tab>
+                  <Tab disable="true" text="Einstellungen">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <Label layoutX="41.0" layoutY="31.0" text="Einstellungen">
+                                 <font>
+                                    <Font size="26.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutX="44.0" layoutY="129.0" prefHeight="25.0" prefWidth="199.0" text="Kontrolliertes Löschen:">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <JFXToggleButton disable="true" layoutX="244.0" layoutY="110.0" selected="true" text="Dektiviert" />
+                              <Label layoutX="45.0" layoutY="170.0" prefHeight="25.0" prefWidth="189.0" text="Automatisches Löschen:">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <JFXToggleButton disable="true" layoutX="245.0" layoutY="153.0" selected="true" text="Dektiviert" />
+                              <Separator layoutX="38.0" layoutY="110.0" prefHeight="15.0" prefWidth="348.0" />
+                              <Separator layoutX="40.0" layoutY="205.0" prefHeight="15.0" prefWidth="348.0" />
+                              <Label layoutX="43.0" layoutY="87.0" text="Löschen">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutX="40.0" layoutY="241.0" text="Benachrichtigungen">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Separator layoutX="40.0" layoutY="263.0" prefHeight="15.0" prefWidth="348.0" />
+                              <Separator layoutX="37.0" layoutY="358.0" prefHeight="15.0" prefWidth="348.0" />
+                              <Label layoutX="425.0" layoutY="239.0" text="Speichern">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Separator layoutX="425.0" layoutY="261.0" prefHeight="15.0" prefWidth="348.0" />
+                              <Separator layoutX="422.0" layoutY="358.0" prefHeight="15.0" prefWidth="348.0" />
+                              <Label layoutX="427.0" layoutY="86.0" text="Task hinzufügen">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Separator layoutX="427.0" layoutY="110.0" prefHeight="15.0" prefWidth="348.0" />
+                              <Separator layoutX="423.0" layoutY="204.0" prefHeight="15.0" prefWidth="348.0" />
+                              <Label layoutX="427.0" layoutY="128.0" prefHeight="25.0" prefWidth="199.0" text="Bevorzugter Standort:">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutX="427.0" layoutY="167.0" prefHeight="25.0" prefWidth="199.0" text="Fahrzeit automatisch:">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <JFXToggleButton layoutX="610.0" layoutY="153.0" text="Dektiviert" />
+                              <Label layoutX="42.0" layoutY="282.0" prefHeight="25.0" prefWidth="199.0" text="Finalisierungserinnerung">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </Label>
+                              <ChoiceBox layoutX="238.0" layoutY="282.0" prefHeight="27.0" prefWidth="147.0" />
+                              <ChoiceBox fx:id="chbPrefLoc" layoutX="610.0" layoutY="128.0" prefHeight="27.0" prefWidth="147.0" />
+                           </children>
+                        </AnchorPane>
+                    </content>
+                  </Tab>
+              </tabs>
+            </TabPane>
+        </children>
+      </VBox>
+   </children>
+</AnchorPane>

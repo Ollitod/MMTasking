@@ -10,64 +10,72 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="455.0" prefWidth="556.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.htlstp.syp.mmtasking.controller.AddTaskController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="455.0" prefWidth="556.0" xmlns="http://javafx.com/javafx/8.0.221" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.htlstp.syp.mmtasking.controller.AddTaskController">
    <children>
-      <Label alignment="CENTER_RIGHT" layoutX="77.0" layoutY="133.0" prefHeight="20.0" prefWidth="74.0" text="Beginn">
+      <Label alignment="CENTER_RIGHT" layoutX="77.0" layoutY="133.0" prefHeight="20.0" prefWidth="74.0" text="Beginn" AnchorPane.rightAnchor="410.0">
          <font>
             <Font size="16.0" />
          </font></Label>
-      <Label alignment="CENTER_RIGHT" layoutX="18.0" layoutY="43.0" prefHeight="20.0" prefWidth="134.0" text="Name">
+      <Label alignment="CENTER_RIGHT" layoutX="18.0" layoutY="43.0" prefHeight="20.0" prefWidth="134.0" text="Titel" AnchorPane.rightAnchor="410.0">
          <font>
             <Font size="16.0" />
          </font></Label>
-      <JFXDatePicker fx:id="dateBegin" defaultColor="#04baf1" layoutX="167.0" layoutY="129.0" promptText="START DATUM" />
-      <JFXTimePicker fx:id="timeBegin" defaultColor="#04baf1" layoutX="356.0" layoutY="128.0" promptText="START ZEIT" />
-      <JFXTextField fx:id="taskName" focusColor="#04baf1" layoutX="166.0" layoutY="40.0" prefHeight="27.0" prefWidth="344.0" promptText="Name" />
-      <JFXDatePicker fx:id="dateEnd" defaultColor="#04baf1" layoutX="169.0" layoutY="174.0" promptText="ENDE DATUM" />
-      <JFXTimePicker fx:id="timeEnd" defaultColor="#04baf1" layoutX="356.0" layoutY="174.0" promptText="ENDE ZEIT" />
-      <Label alignment="CENTER_RIGHT" layoutX="74.0" layoutY="179.0" prefHeight="20.0" prefWidth="74.0" text="Ende">
+      <JFXDatePicker fx:id="dateBegin" defaultColor="#04baf1" layoutX="167.0" layoutY="129.0" promptText="dd.mm.yyyy" AnchorPane.leftAnchor="165.0" />
+      <JFXTimePicker fx:id="timeBegin" defaultColor="#04baf1" layoutX="356.0" layoutY="128.0" promptText="hh:mm" AnchorPane.rightAnchor="25.0" />
+      <JFXTextField fx:id="taskName" focusColor="#04baf1" layoutX="166.0" layoutY="40.0" prefHeight="27.0" prefWidth="344.0" promptText="Name" AnchorPane.leftAnchor="165.0" AnchorPane.rightAnchor="25.0" />
+      <JFXDatePicker fx:id="dateEnd" defaultColor="#04baf1" layoutX="169.0" layoutY="174.0" promptText="dd.mm.yyyy" AnchorPane.leftAnchor="165.0" />
+      <JFXTimePicker fx:id="timeEnd" defaultColor="#04baf1" layoutX="356.0" layoutY="174.0" promptText="hh:mm" AnchorPane.rightAnchor="25.0" />
+      <Label alignment="CENTER_RIGHT" layoutX="74.0" layoutY="179.0" prefHeight="20.0" prefWidth="74.0" text="Ende" AnchorPane.rightAnchor="410.0">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
-      <JFXCheckBox fx:id="cbDeletable" checkedColor="#5a5a5a" layoutX="432.0" layoutY="285.0" selected="true" text="Löschbar" />
-      <JFXCheckBox fx:id="cbHoch" checkedColor="#ff0101" layoutX="169.0" layoutY="285.0" prefHeight="10.0" prefWidth="58.0" selected="true" text="Hoch" textFill="RED" unCheckedColor="#ff0101" />
-      <JFXCheckBox fx:id="cbNiedrig" checkedColor="#0dd04b" layoutX="337.0" layoutY="285.0" text="Niedrig" textFill="#0dd04b" unCheckedColor="#0dd04b" />
-      <JFXCheckBox fx:id="cbMittel" checkedColor="#ffa100" layoutX="251.0" layoutY="285.0" text="Mittel" textFill="ORANGE" unCheckedColor="#ffa100" />
-      <Label layoutX="416.0" layoutY="276.0" text="|">
+      <FlowPane hgap="25.0" layoutX="155.0" layoutY="275.0" AnchorPane.leftAnchor="165.0" AnchorPane.rightAnchor="25.0">
+         <children>
+            <JFXCheckBox fx:id="cbHoch" checkedColor="#ff0101" prefHeight="10.0" prefWidth="58.0" selected="true" text="Hoch" textFill="RED" unCheckedColor="#ff0101" />
+            <JFXCheckBox fx:id="cbMittel" checkedColor="#ffa100" text="Mittel" textFill="ORANGE" unCheckedColor="#ffa100" />
+            <JFXCheckBox fx:id="cbNiedrig" checkedColor="#0dd04b" text="Niedrig" textFill="#0dd04b" unCheckedColor="#0dd04b" />
+            <Label text="|">
+               <font>
+                  <Font size="25.0" />
+               </font>
+            </Label>
+            <JFXCheckBox fx:id="cbDeletable" checkedColor="#5a5a5a" selected="true" text="Löschbar" />
+         </children>
+      </FlowPane>
+      <JFXTextArea fx:id="taNote" focusColor="#04baf1" layoutX="165.0" layoutY="328.0" prefHeight="66.0" prefWidth="344.0" AnchorPane.leftAnchor="165.0" AnchorPane.rightAnchor="25.0" />
+      <JFXButton fx:id="addTask" layoutX="416.0" layoutY="406.0" onAction="#doAddTask" prefHeight="25.0" prefWidth="99.0" ripplerFill="#5d5d5d" style="-fx-background-color: #04baf1;" text="Task anlegen" AnchorPane.leftAnchor="165.0" AnchorPane.rightAnchor="25.0">
          <font>
-            <Font size="25.0" />
-         </font>
-      </Label>
-      <JFXTextArea fx:id="taNote" focusColor="#04baf1" layoutX="165.0" layoutY="328.0" prefHeight="66.0" prefWidth="344.0" />
-      <JFXButton fx:id="addTask" buttonType="RAISED" layoutX="416.0" layoutY="406.0" onAction="#doAddTask" ripplerFill="#09bc3b" text="Task anlegen" />
-      <Label alignment="CENTER_RIGHT" layoutX="72.0" layoutY="284.0" prefHeight="20.0" prefWidth="74.0" text="Priorität">
-         <font>
-            <Font size="16.0" />
-         </font>
-      </Label>
-      <Label alignment="CENTER_RIGHT" layoutX="37.0" layoutY="341.0" prefHeight="20.0" prefWidth="108.0" text="Kommentar">
-         <font>
-            <Font size="16.0" />
-         </font>
-      </Label>
-      <Label alignment="CENTER_RIGHT" layoutX="45.0" layoutY="228.0" prefHeight="20.0" prefWidth="99.0" text="Ort">
+            <Font size="14.0" />
+         </font></JFXButton>
+      <Label alignment="CENTER_RIGHT" layoutX="72.0" layoutY="284.0" prefHeight="20.0" prefWidth="74.0" text="Priorität" AnchorPane.rightAnchor="410.0">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
-      <Label alignment="CENTER_RIGHT" layoutX="29.0" layoutY="79.0" prefHeight="20.0" prefWidth="124.0" text="Kategorie">
+      <Label alignment="CENTER_RIGHT" layoutX="37.0" layoutY="341.0" prefHeight="20.0" prefWidth="108.0" text="Notiz" AnchorPane.rightAnchor="410.0">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
-      <Separator layoutX="77.0" layoutY="119.0" prefHeight="0.0" prefWidth="455.0" />
-      <Separator layoutX="80.0" layoutY="273.0" prefHeight="0.0" prefWidth="455.0" />
-      <Separator layoutX="80.0" layoutY="312.0" prefHeight="0.0" prefWidth="455.0" />
-      <Separator layoutX="77.0" layoutY="34.0" prefHeight="0.0" prefWidth="455.0" />
-      <ChoiceBox fx:id="cbLocs" layoutX="167.0" layoutY="225.0" prefHeight="27.0" prefWidth="155.0" />
-      <ChoiceBox fx:id="cbCategory" layoutX="165.0" layoutY="76.0" prefWidth="150.0" />
+      <Label alignment="CENTER_RIGHT" layoutX="45.0" layoutY="228.0" prefHeight="20.0" prefWidth="99.0" text="Ort" AnchorPane.rightAnchor="410.0">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <Label alignment="CENTER_RIGHT" layoutX="29.0" layoutY="79.0" prefHeight="20.0" prefWidth="124.0" text="Kategorie" AnchorPane.rightAnchor="410.0">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <Separator layoutX="77.0" layoutY="119.0" prefHeight="0.0" prefWidth="455.0" AnchorPane.leftAnchor="75.0" AnchorPane.rightAnchor="25.0" />
+      <Separator layoutX="80.0" layoutY="273.0" prefHeight="0.0" prefWidth="455.0" AnchorPane.leftAnchor="75.0" AnchorPane.rightAnchor="25.0" />
+      <Separator layoutX="80.0" layoutY="312.0" prefHeight="0.0" prefWidth="455.0" AnchorPane.leftAnchor="75.0" AnchorPane.rightAnchor="25.0" />
+      <Separator layoutX="77.0" layoutY="34.0" prefHeight="0.0" prefWidth="455.0" AnchorPane.leftAnchor="75.0" AnchorPane.rightAnchor="25.0" />
+      <ChoiceBox fx:id="cbLocs" layoutX="167.0" layoutY="225.0" prefHeight="27.0" prefWidth="155.0" AnchorPane.leftAnchor="165.0" />
+      <ChoiceBox fx:id="cbCategory" layoutX="165.0" layoutY="76.0" prefWidth="150.0" AnchorPane.leftAnchor="165.0" />
    </children>
 </AnchorPane>

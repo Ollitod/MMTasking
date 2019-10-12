@@ -75,6 +75,7 @@ public class AddTaskController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        task = null;
         setUpEnv();
     }
 
@@ -84,8 +85,8 @@ public class AddTaskController implements Initializable {
         Task t = null;
 
         try {
-            LocalDateTime von = LocalDateTime.of(dateBegin.getValue(), timeBegin.getValue());
-            LocalDateTime nach = LocalDateTime.of(dateEnd.getValue(), timeEnd.getValue());
+            LocalDateTime von = LocalDateTime.of(dateBegin.getValue(), timeBegin.getValue().withSecond(0));
+            LocalDateTime nach = LocalDateTime.of(dateEnd.getValue(), timeEnd.getValue().withSecond(0));
             Location location = cbLocs.getSelectionModel().getSelectedItem();
             Fahrt fahrt = dao.getFahrtNach(location);
             TaskPriority priority = getSelectedPriority();
