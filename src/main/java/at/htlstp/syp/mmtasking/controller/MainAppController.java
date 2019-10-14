@@ -9,7 +9,6 @@ import at.htlstp.syp.mmtasking.MainApp;
 import at.htlstp.syp.mmtasking.Setup;
 import at.htlstp.syp.mmtasking.db.MMTDAO;
 import at.htlstp.syp.mmtasking.db.MMTDBException;
-import at.htlstp.syp.mmtasking.model.Appointment;
 import at.htlstp.syp.mmtasking.model.Category;
 import at.htlstp.syp.mmtasking.model.Fahrt;
 import at.htlstp.syp.mmtasking.model.Location;
@@ -31,7 +30,6 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.time.DayOfWeek;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -49,6 +47,10 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -59,7 +61,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Bounds;
 import javafx.geometry.Side;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -74,10 +75,11 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -143,8 +145,6 @@ public class MainAppController implements Initializable {
     private Timeline clock;
     private Timeline date;
     private Timeline autologout;
-    private Instant logoutTime;
-    private List<JFXCheckBox> checkboxes;
     private MMTDAO dao = MMTDAO.getInstance();
 
     private ObservableList<Category> categories = FXCollections.observableArrayList();
@@ -180,10 +180,20 @@ public class MainAppController implements Initializable {
     
     private int fromTab;
     
+    private final BooleanProperty detailViewEmptyProperty = new SimpleBooleanProperty(true);
+
+    private BooleanProperty detailViewEmptyProperty() {
+        return detailViewEmptyProperty;
+    }
+    
     @FXML
     private Label caption;
     @FXML
     private JFXButton btnBack;
+    @FXML
+    private ImageView ivStatusD;
+    @FXML
+    private Tab tabDetailView;
 
     /**
      * Initializes the controller class.
@@ -203,22 +213,29 @@ public class MainAppController implements Initializable {
         initFinalizing();
 
         // Controls initialiseren
-        setUpEnv();
-
-//        tabPane.getSelectionModel().selectedItemProperty().addListener((Observable observable) -> {
-//            Tab t = (Tab) observable;
-//            if (t.getText().equals("Finalisierung")) {
-//                initFinalizing();
-//            }
-//        });
+        initEnvironment();
+        
+        tabDetailView.disableProperty().bind(detailViewEmptyProperty);
+        
+        // Listener für aktuell selektierten Tab hinzufügen
+        tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue.getText().equals("Detailansicht") && !detailViewEmptyProperty.get()) {
+                clearDetailView();
+            } else {
+                fromTab = tabPane.getTabs().indexOf(oldValue);
+            }
+        });
+        
         // Analyse initialiseren
         setupAnalysis();
 
-//        
-        setUpDetailView();
+        // Logik für Detailansicht initialiseren
+        initDetailView();
 
+        // Binding für Fahrzeit in Detailansicht initialisierne
         initFahrzeitBinding();
-
+        
+        // Benutzerdefinierte ListCell für ListView festlegen
         lvTaskM.setCellFactory(new Callback<ListView<Task>, ListCell<Task>>() {
             @Override
             public ListCell<Task> call(ListView<Task> param) {
@@ -226,6 +243,7 @@ public class MainAppController implements Initializable {
             }
         });
 
+        // Benutzerdefinierte ListCell für ListView festlegen
         lvAusstehendeTasks.setCellFactory(new Callback<ListView<Task>, ListCell<Task>>() {
             @Override
             public ListCell<Task> call(ListView<Task> param) {
@@ -265,7 +283,7 @@ public class MainAppController implements Initializable {
         refreshLocations();
     }
 
-    private void setUpEnv() {
+    private void initEnvironment() {
 //        categories = FXCollections.observableArrayList(dao.getAllCategories());
 //        locations = FXCollections.observableArrayList(dao.getAllLocations());
         cbLocs.setItems(locations);
@@ -355,11 +373,11 @@ public class MainAppController implements Initializable {
         clock.play();
     }
 
-    private void setUpDetailView() {
+    private void initDetailView() {
         lvTaskM.setOnMouseClicked((MouseEvent event) -> {
             if (event.getClickCount() == 2) {
                 selectedTask = lvTaskM.getSelectionModel().getSelectedItem();
-                setDetailView(0);
+                setDetailView();
             }
         });
 
@@ -376,7 +394,7 @@ public class MainAppController implements Initializable {
         });
     }
 
-    private void setDetailView(int tab) {
+    private void setDetailView() {
         tfTaskD.setText(selectedTask.getTitle());
         Category c = Category.getCategory(selectedTask.getCategory());
         cbCategoryD.getSelectionModel().select(c);
@@ -385,12 +403,13 @@ public class MainAppController implements Initializable {
         timeVonD.setValue(selectedTask.getBeginning().toLocalTime());
         timeBisD.setValue(selectedTask.getEnd().toLocalTime());
         cbLocs.getSelectionModel().select(selectedTask.getFahrt().getNach());
+        ivStatusD.setImage(selectedTask.isFinalized() ? new Image("success.png") : new Image("loading.png"));
         changePriority(selectedTask.getPriority());
         cbDeleteableD.setSelected(selectedTask.isDeletable());
         taCommentD.setText(selectedTask.getNote());
 
-        fromTab = tab;
-        tabPane.getSelectionModel().select(1);
+        detailViewEmptyProperty.set(false);
+        tabPane.getSelectionModel().select(tabDetailView);
     }
 
     private void changePriority(TaskPriority priority) {
@@ -503,7 +522,6 @@ public class MainAppController implements Initializable {
             tasks.set(tasks.indexOf(selectedTask), selectedTask);
             Notifier.INSTANCE.notifySuccess("Task upgedated!", "Der Task wurde erfolgreich upgedated!");
             tabPane.getSelectionModel().select(fromTab);
-            clearDetailView();
         } catch (MMTDBException ex) {
             Notifier.INSTANCE.notifyError("Fehlgeschlagen!", "Task wurde nicht upgedated!");
         }
@@ -517,9 +535,13 @@ public class MainAppController implements Initializable {
         timeVonD.setValue(null);
         timeBisD.setValue(null);
         cbLocs.getSelectionModel().selectFirst();
+        ivStatusD.setImage(null);
         changePriority(null);
         cbDeleteableD.setSelected(false);
         taCommentD.setText(null);
+        
+        detailViewEmptyProperty.set(true);
+        System.out.println("Detailview cleared!");
     }
 
     private void initFahrzeitBinding() {
@@ -732,7 +754,7 @@ public class MainAppController implements Initializable {
     @FXML
     private void onEditTaskClicked(ActionEvent event) {
         selectedTask = lvAusstehendeTasks.getSelectionModel().getSelectedItem();
-        setDetailView(2);
+        setDetailView();
     }
 
     @FXML

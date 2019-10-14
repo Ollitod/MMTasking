@@ -76,7 +76,7 @@ public class AddTaskController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         task = null;
-        setUpEnv();
+        initEnvironment();
     }
 
     @FXML
@@ -131,7 +131,7 @@ public class AddTaskController implements Initializable {
         }
     }
 
-    private void setUpEnv() {
+    private void initEnvironment() {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -143,7 +143,7 @@ public class AddTaskController implements Initializable {
         timeBegin.setValue(LocalTime.now());
 
         cbLocs.getItems().addAll(dao.getAllLocations());
-        cbLocs.getSelectionModel().selectFirst();
+        cbLocs.getSelectionModel().select(dao.findLocationByName("Irnfritz"));
         cbCategory.getItems().addAll(dao.getAllCategories());
         cbCategory.getSelectionModel().selectFirst();
         cbHoch.setOnMouseClicked((event) -> {
